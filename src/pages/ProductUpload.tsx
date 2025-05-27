@@ -31,9 +31,9 @@ const ProductUpload = () => {
   const categories = ['Seeds', 'Fertilizers', 'Pesticides', 'Tools'];
   const badges = ['Best Seller', 'Organic', 'Premium', 'New Arrival', 'Limited Offer'];
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    const imageUrls = files.map(file => URL.createObjectURL(file));
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []) as File[];
+    const imageUrls = files.map((file: File) => URL.createObjectURL(file));
     setCurrentProduct(prev => ({
       ...prev,
       images: [...prev.images, ...imageUrls]
@@ -47,14 +47,14 @@ const ProductUpload = () => {
     }));
   };
 
-  const updateFeature = (index, value) => {
+  const updateFeature = (index: number, value: string) => {
     setCurrentProduct(prev => ({
       ...prev,
       features: prev.features.map((feature, i) => i === index ? value : feature)
     }));
   };
 
-  const removeFeature = (index) => {
+  const removeFeature = (index: number) => {
     setCurrentProduct(prev => ({
       ...prev,
       features: prev.features.filter((_, i) => i !== index)
@@ -110,7 +110,7 @@ const ProductUpload = () => {
     });
   };
 
-  const deleteProduct = (id) => {
+  const deleteProduct = (id: number) => {
     setProducts(prev => prev.filter(p => p.id !== id));
     toast({
       title: "Product Deleted",
@@ -330,7 +330,7 @@ const ProductUpload = () => {
                 {products.length === 0 ? (
                   <p className="text-gray-500 text-center py-8">No products added yet</p>
                 ) : (
-                  products.map((product) => (
+                  products.map((product: any) => (
                     <div key={product.id} className="border rounded-lg p-4">
                       <div className="flex justify-between items-start mb-2">
                         <div>
