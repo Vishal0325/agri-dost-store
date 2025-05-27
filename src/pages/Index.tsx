@@ -1,25 +1,26 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, User, Search, Phone, MessageCircle, Truck, Shield, Star, ArrowRight, Leaf, Sprout, Bug, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const HomePage = () => {
   const [currentBanner, setCurrentBanner] = useState(0);
+  const { language, setLanguage, t } = useLanguage();
 
   const banners = [
     {
-      title: "Premium Seeds at Best Prices",
-      subtitle: "Get 20% off on all hybrid seeds",
+      title: t('hero.title1'),
+      subtitle: t('hero.subtitle1'),
       image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
-      cta: "Shop Seeds"
+      cta: t('hero.cta1')
     },
     {
       title: "Organic Fertilizers Available",
       subtitle: "Boost your crop yield naturally",
-      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?ixlib=rb-4.0.3",
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
       cta: "Shop Fertilizers"
     },
     {
@@ -31,10 +32,10 @@ const HomePage = () => {
   ];
 
   const categories = [
-    { name: 'Seeds', icon: Sprout, color: 'bg-green-500', count: '500+' },
-    { name: 'Fertilizers', icon: Leaf, color: 'bg-emerald-500', count: '200+' },
-    { name: 'Pesticides', icon: Bug, color: 'bg-red-500', count: '150+' },
-    { name: 'Tools', icon: Wrench, color: 'bg-blue-500', count: '300+' },
+    { name: t('nav.seeds'), icon: Sprout, color: 'bg-green-500', count: '500+' },
+    { name: t('nav.fertilizers'), icon: Leaf, color: 'bg-emerald-500', count: '200+' },
+    { name: t('nav.pesticides'), icon: Bug, color: 'bg-red-500', count: '150+' },
+    { name: t('nav.tools'), icon: Wrench, color: 'bg-blue-500', count: '300+' },
   ];
 
   const featuredProducts = [
@@ -91,6 +92,10 @@ const HomePage = () => {
     return () => clearInterval(timer);
   }, []);
 
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setLanguage(e.target.value as 'en' | 'hi');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -101,15 +106,19 @@ const HomePage = () => {
             <div className="flex items-center space-x-4">
               <span className="flex items-center text-green-600">
                 <Phone className="h-4 w-4 mr-1" />
-                1800-123-4567
+                {t('header.phone')}
               </span>
-              <span className="text-gray-600">Free shipping on orders above ₹999</span>
+              <span className="text-gray-600">{t('header.shipping')}</span>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-600">Download App</span>
-              <select className="text-gray-600 bg-transparent">
-                <option>English</option>
-                <option>हिंदी</option>
+              <select 
+                className="text-gray-600 bg-transparent border rounded px-2 py-1"
+                value={language}
+                onChange={handleLanguageChange}
+              >
+                <option value="en">English</option>
+                <option value="hi">हिंदी</option>
               </select>
             </div>
           </div>
@@ -128,7 +137,7 @@ const HomePage = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <input 
                   type="text" 
-                  placeholder="Search for seeds, fertilizers, tools..."
+                  placeholder={t('header.search')}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
@@ -137,11 +146,11 @@ const HomePage = () => {
             <div className="flex items-center space-x-4">
               <Button variant="ghost" className="flex items-center space-x-1">
                 <User className="h-5 w-5" />
-                <span>Login</span>
+                <span>{t('header.login')}</span>
               </Button>
               <Button variant="ghost" className="flex items-center space-x-1 relative">
                 <ShoppingCart className="h-5 w-5" />
-                <span>Cart</span>
+                <span>{t('header.cart')}</span>
                 <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
                   3
                 </Badge>
@@ -159,8 +168,8 @@ const HomePage = () => {
                   </Link>
                 </li>
               ))}
-              <li><Link to="/offers" className="text-red-600 hover:text-red-700 font-medium">Special Offers</Link></li>
-              <li><Link to="/blog" className="text-gray-700 hover:text-green-600 font-medium">Farming Tips</Link></li>
+              <li><Link to="/offers" className="text-red-600 hover:text-red-700 font-medium">{t('nav.offers')}</Link></li>
+              <li><Link to="/blog" className="text-gray-700 hover:text-green-600 font-medium">{t('nav.blog')}</Link></li>
             </ul>
           </nav>
         </div>
@@ -209,7 +218,7 @@ const HomePage = () => {
       {/* Categories Section */}
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Shop by Category</h2>
+          <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">{t('categories.title')}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {categories.map((category) => {
               const IconComponent = category.icon;
@@ -239,7 +248,7 @@ const HomePage = () => {
       <section className="py-12 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">Featured Products</h2>
+            <h2 className="text-3xl font-bold text-gray-800">{t('products.title')}</h2>
             <Link to="/products" className="text-green-600 hover:text-green-700 font-medium flex items-center">
               View All <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
@@ -294,7 +303,7 @@ const HomePage = () => {
                   </div>
                   
                   <Button className="w-full bg-green-600 hover:bg-green-700">
-                    Add to Cart
+                    {t('products.addToCart')}
                   </Button>
                 </CardContent>
               </Card>
