@@ -10,9 +10,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
+interface Product {
+  id: number;
+  name: string;
+  category: string;
+  brand: string;
+  price: string;
+  originalPrice: string;
+  description: string;
+  features: string[];
+  specifications: Record<string, string>;
+  images: string[];
+  inStock: boolean;
+  badge: string;
+  discount: string;
+}
+
 const ProductUpload = () => {
   const { toast } = useToast();
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [currentProduct, setCurrentProduct] = useState({
     name: '',
     category: '',
@@ -21,8 +37,8 @@ const ProductUpload = () => {
     originalPrice: '',
     description: '',
     features: [''],
-    specifications: {},
-    images: [],
+    specifications: {} as Record<string, string>,
+    images: [] as string[],
     inStock: true,
     badge: '',
     discount: ''
@@ -82,7 +98,7 @@ const ProductUpload = () => {
       return;
     }
 
-    const productToSave = {
+    const productToSave: Product = {
       ...currentProduct,
       id: Date.now(),
       features: currentProduct.features.filter(f => f.trim() !== '')
@@ -97,8 +113,8 @@ const ProductUpload = () => {
       originalPrice: '',
       description: '',
       features: [''],
-      specifications: {},
-      images: [],
+      specifications: {} as Record<string, string>,
+      images: [] as string[],
       inStock: true,
       badge: '',
       discount: ''
@@ -330,7 +346,7 @@ const ProductUpload = () => {
                 {products.length === 0 ? (
                   <p className="text-gray-500 text-center py-8">No products added yet</p>
                 ) : (
-                  products.map((product: any) => (
+                  products.map((product: Product) => (
                     <div key={product.id} className="border rounded-lg p-4">
                       <div className="flex justify-between items-start mb-2">
                         <div>
