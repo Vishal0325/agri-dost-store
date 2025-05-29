@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Search, Phone, MessageCircle, Truck, Shield, Star, ArrowRight, Leaf, Sprout, Bug, Wrench, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, Search, Phone, MessageCircle, Truck, Shield, Star, ArrowRight, Leaf, Sprout, Bug, Wrench, Menu, X, IndianRupee } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LoginModal from '@/components/LoginModal';
 import DeliveryTimer from '@/components/DeliveryTimer';
+import UpiPayment from './UpiPayment';
 
 interface CustomerData {
   name: string;
@@ -103,7 +104,7 @@ const HomePage = () => {
       originalPrice: "₹400",
       rating: 4.4,
       reviews: 92,
-      image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3",
+      image: "https://images.unsplash.com/photo-1445282768818-728615cc910a?ixlib=rb-4.0.3",
       discount: "20% OFF",
       badge: "Best Seller"
     },
@@ -147,7 +148,7 @@ const HomePage = () => {
       originalPrice: "₹350",
       rating: 4.5,
       reviews: 101,
-      image: "https://images.unsplash.com/photo-1445282768818-728615cc910a?ixlib=rb-4.0.3",
+      image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3",
       discount: "20% OFF",
       badge: "Best Seller"
     },
@@ -250,61 +251,70 @@ const HomePage = () => {
   };
 
   const handleCartClick = () => {
+    console.log('Cart button clicked');
     navigate('/cart');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      {/* Modern Header */}
-      <header className="bg-white/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-orange-50">
+      {/* Enhanced Indian Header */}
+      <header className="bg-gradient-to-r from-green-600 to-green-700 shadow-2xl sticky top-0 z-50">
         <div className="container mx-auto px-4">
-          {/* Top bar with enhanced design */}
-          <div className="flex justify-between items-center py-3 text-sm border-b border-gray-100">
-            <div className="flex items-center space-x-6">
-              <span className="flex items-center text-green-600 hover:text-green-700 transition-colors">
+          {/* Top bar with Indian styling */}
+          <div className="flex justify-between items-center py-2 text-sm border-b border-green-500/30">
+            <div className="flex items-center space-x-6 text-green-100">
+              <span className="flex items-center hover:text-white transition-colors cursor-pointer">
                 <Phone className="h-4 w-4 mr-2" />
-                <span className="font-medium">{t('header.phone')}</span>
+                <span className="font-medium">1800-KRISHI-MART</span>
               </span>
-              <span className="text-gray-600 flex items-center">
+              <span className="flex items-center">
                 <Truck className="h-4 w-4 mr-2" />
-                {t('header.shipping')}
+                Free delivery on orders above ₹999
               </span>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-600 hover:text-gray-800 cursor-pointer transition-colors">Download App</span>
+              <span className="text-green-100 hover:text-white cursor-pointer transition-colors">
+                📱 Download App
+              </span>
               <select 
-                className="text-gray-600 bg-white border border-gray-200 rounded-md px-3 py-1 hover:border-green-500 focus:border-green-500 focus:outline-none transition-colors"
+                className="bg-green-600 text-white border border-green-500 rounded-md px-3 py-1 hover:bg-green-500 focus:bg-green-500 focus:outline-none transition-colors"
                 value={language}
                 onChange={handleLanguageChange}
               >
-                <option value="en">English</option>
-                <option value="hi">हिंदी</option>
+                <option value="en">🇮🇳 English</option>
+                <option value="hi">🇮🇳 हिंदी</option>
               </select>
             </div>
           </div>
 
-          {/* Main header with modern design */}
+          {/* Main header with Indian design elements */}
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center space-x-8">
               <Link to="/" className="flex items-center space-x-3 group">
-                <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                  <Leaf className="h-7 w-7" />
+                <div className="bg-white text-green-600 p-3 rounded-xl shadow-lg group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110">
+                  <Leaf className="h-8 w-8" />
                 </div>
-                <span className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">
-                  KrishiMart
-                </span>
+                <div>
+                  <span className="text-3xl font-bold text-white">
+                    कृषि
+                  </span>
+                  <span className="text-3xl font-bold text-orange-200">
+                    Mart
+                  </span>
+                  <p className="text-xs text-green-200">भारत का किसान स्टोर</p>
+                </div>
               </Link>
               
-              <div className="relative flex-1 max-w-xl">
+              <div className="relative flex-1 max-w-2xl">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <input 
                   type="text" 
-                  placeholder={t('header.search')}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent shadow-sm hover:shadow-md transition-all duration-300"
+                  placeholder="Search for seeds, fertilizers, tools..."
+                  className="w-full pl-12 pr-4 py-3 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 shadow-lg text-gray-700 placeholder-gray-500"
                 />
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700 rounded-lg px-4">
-                    Search
+                  <Button size="sm" className="bg-orange-500 hover:bg-orange-600 rounded-lg px-6 shadow-md">
+                    खोजें
                   </Button>
                 </div>
               </div>
@@ -313,21 +323,21 @@ const HomePage = () => {
             <div className="flex items-center space-x-3">
               <Button 
                 variant="ghost" 
-                className="flex items-center space-x-2 hover:bg-green-50 hover:text-green-700 transition-colors rounded-xl px-4 py-2"
+                className="flex items-center space-x-2 text-white hover:bg-green-500/20 transition-colors rounded-xl px-4 py-2"
                 onClick={handleLoginClick}
               >
                 <User className="h-5 w-5" />
-                <span className="font-medium">{customerData ? customerData.name : t('header.login')}</span>
+                <span className="font-medium">{customerData ? customerData.name : 'Login'}</span>
               </Button>
               
               <Button 
                 variant="ghost" 
-                className="flex items-center space-x-2 relative hover:bg-green-50 hover:text-green-700 transition-colors rounded-xl px-4 py-2"
+                className="flex items-center space-x-2 relative text-white hover:bg-green-500/20 transition-colors rounded-xl px-4 py-2"
                 onClick={handleCartClick}
               >
                 <ShoppingCart className="h-5 w-5" />
-                <span className="font-medium">{t('header.cart')}</span>
-                <Badge variant="destructive" className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs animate-pulse">
+                <span className="font-medium">Cart</span>
+                <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center text-xs bg-orange-500 text-white animate-bounce">
                   3
                 </Badge>
               </Button>
@@ -336,7 +346,7 @@ const HomePage = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="md:hidden"
+                className="md:hidden text-white"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -344,15 +354,15 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Enhanced Navigation */}
-          <nav className="py-4 border-t border-gray-100">
+          {/* Indian-styled Navigation */}
+          <nav className="py-4 border-t border-green-500/30">
             <div className={`${isMenuOpen ? 'block' : 'hidden'} md:block`}>
               <ul className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-8">
                 {categories.map((category) => (
                   <li key={category.name}>
                     <Link 
                       to={`/category/${category.name.toLowerCase()}`} 
-                      className="block text-gray-700 hover:text-green-600 font-medium py-2 px-4 rounded-lg hover:bg-green-50 transition-all duration-300"
+                      className="block text-green-100 hover:text-white font-medium py-2 px-4 rounded-lg hover:bg-green-500/20 transition-all duration-300"
                     >
                       {category.name}
                     </Link>
@@ -361,17 +371,17 @@ const HomePage = () => {
                 <li>
                   <Link 
                     to="/offers" 
-                    className="block text-red-600 hover:text-red-700 font-medium py-2 px-4 rounded-lg hover:bg-red-50 transition-all duration-300"
+                    className="block text-orange-200 hover:text-orange-100 font-medium py-2 px-4 rounded-lg hover:bg-orange-500/20 transition-all duration-300"
                   >
-                    {t('nav.offers')}
+                    🎉 Special Offers
                   </Link>
                 </li>
                 <li>
                   <Link 
-                    to="/blog" 
-                    className="block text-gray-700 hover:text-green-600 font-medium py-2 px-4 rounded-lg hover:bg-green-50 transition-all duration-300"
+                    to="/purchase-history" 
+                    className="block text-green-100 hover:text-white font-medium py-2 px-4 rounded-lg hover:bg-green-500/20 transition-all duration-300"
                   >
-                    {t('nav.blog')}
+                    📋 Purchase History
                   </Link>
                 </li>
               </ul>
@@ -391,52 +401,60 @@ const HomePage = () => {
         </div>
       )}
 
-      {/* Enhanced Hero Banner */}
-      <section className="relative h-[500px] overflow-hidden">
+      {/* Enhanced Indian Hero Banner */}
+      <section className="relative h-[600px] overflow-hidden">
         {banners.map((banner, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
               index === currentBanner ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             }`}
             style={{
-              backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${banner.image})`,
+              backgroundImage: `linear-gradient(135deg, rgba(0,128,0,0.8), rgba(255,140,0,0.6)), url(${banner.image})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
           >
             <div className="container mx-auto px-4 h-full flex items-center">
-              <div className="text-white max-w-2xl animate-fade-in">
-                <h1 className="text-6xl font-bold mb-6 leading-tight">{banner.title}</h1>
-                <p className="text-xl mb-8 opacity-90">{banner.subtitle}</p>
-                <Button size="lg" className="bg-green-600 hover:bg-green-700 text-lg px-8 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                  {banner.cta} <ArrowRight className="ml-3 h-6 w-6" />
-                </Button>
+              <div className="text-white max-w-3xl animate-fade-in">
+                <h1 className="text-7xl font-bold mb-6 leading-tight drop-shadow-2xl">
+                  {banner.title}
+                </h1>
+                <p className="text-2xl mb-8 opacity-95 drop-shadow-lg">{banner.subtitle}</p>
+                <div className="flex space-x-4">
+                  <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-xl px-10 py-6 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
+                    {banner.cta} <ArrowRight className="ml-3 h-7 w-7" />
+                  </Button>
+                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600 text-xl px-10 py-6 rounded-2xl backdrop-blur-sm">
+                    UPI पेमेंट <IndianRupee className="ml-3 h-7 w-7" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         ))}
         
         {/* Enhanced Banner indicators */}
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4">
           {banners.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentBanner(index)}
-              className={`w-4 h-4 rounded-full transition-all duration-300 ${
-                index === currentBanner ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
+              className={`w-5 h-5 rounded-full transition-all duration-300 ${
+                index === currentBanner ? 'bg-white scale-125 shadow-lg' : 'bg-white/60 hover:bg-white/80'
               }`}
             />
           ))}
         </div>
       </section>
 
-      {/* Enhanced Categories Section */}
-      <section className="py-16 bg-white">
+      {/* Enhanced Indian Categories Section */}
+      <section className="py-20 bg-gradient-to-br from-white to-green-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">{t('categories.title')}</h2>
-            <p className="text-xl text-gray-600">Discover our wide range of agricultural products</p>
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold text-gray-800 mb-6">हमारे उत्पाद</h2>
+            <p className="text-2xl text-gray-600">किसानों के लिए बेहतरीन गुणवत्ता</p>
+            <div className="w-24 h-1 bg-gradient-to-r from-green-500 to-orange-500 mx-auto mt-4 rounded-full"></div>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {categories.map((category) => {
@@ -447,13 +465,16 @@ const HomePage = () => {
                   to={`/category/${category.name.toLowerCase()}`}
                   className="group"
                 >
-                  <Card className="text-center hover:shadow-2xl transition-all duration-500 group-hover:scale-105 transform border-0 shadow-lg overflow-hidden">
+                  <Card className="text-center hover:shadow-2xl transition-all duration-500 group-hover:scale-105 transform border-0 shadow-xl overflow-hidden bg-gradient-to-br from-white to-gray-50">
                     <CardContent className="p-8">
-                      <div className={`${category.color} w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                        <IconComponent className="h-10 w-10 text-white" />
+                      <div className={`${category.color} w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-2xl`}>
+                        <IconComponent className="h-12 w-12 text-white" />
                       </div>
-                      <h3 className="font-bold text-xl mb-3 text-gray-800 group-hover:text-green-600 transition-colors">{category.name}</h3>
-                      <p className="text-gray-600 font-medium">{category.count} products</p>
+                      <h3 className="font-bold text-2xl mb-3 text-gray-800 group-hover:text-green-600 transition-colors">{category.name}</h3>
+                      <p className="text-gray-600 font-medium text-lg">{category.count} products</p>
+                      <Badge className="mt-3 bg-gradient-to-r from-green-500 to-green-600 text-white">
+                        Shop Now
+                      </Badge>
                     </CardContent>
                   </Card>
                 </Link>

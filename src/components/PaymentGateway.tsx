@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { CreditCard, Smartphone, Banknote, Wallet, Shield, Check } from 'lucide-react';
+import { CreditCard, Smartphone, Banknote, Wallet, Shield, Check, IndianRupee } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,9 +9,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const PaymentGateway = ({ orderTotal = 1299, onPaymentSuccess }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [selectedMethod, setSelectedMethod] = useState('upi');
   const [upiId, setUpiId] = useState('');
   const [cardDetails, setCardDetails] = useState({
@@ -26,37 +28,42 @@ const PaymentGateway = ({ orderTotal = 1299, onPaymentSuccess }) => {
     {
       id: 'upi',
       name: 'UPI',
-      icon: <Smartphone className="h-5 w-5" />,
-      description: 'Pay using Google Pay, PhonePe, Paytm, etc.',
-      popular: true
+      icon: <IndianRupee className="h-5 w-5" />,
+      description: 'Google Pay, PhonePe, Paytm, BHIM',
+      popular: true,
+      instant: true
     },
     {
       id: 'cards',
       name: 'Credit/Debit Cards',
       icon: <CreditCard className="h-5 w-5" />,
       description: 'Visa, Mastercard, RuPay accepted',
-      popular: false
+      popular: false,
+      instant: false
     },
     {
       id: 'netbanking',
       name: 'Net Banking',
       icon: <Banknote className="h-5 w-5" />,
-      description: 'Pay directly from your bank account',
-      popular: false
+      description: 'All major banks supported',
+      popular: false,
+      instant: false
     },
     {
       id: 'wallet',
       name: 'Digital Wallets',
       icon: <Wallet className="h-5 w-5" />,
       description: 'Paytm, Mobikwik, Amazon Pay',
-      popular: false
+      popular: false,
+      instant: true
     },
     {
       id: 'cod',
       name: 'Cash on Delivery',
       icon: <Banknote className="h-5 w-5" />,
-      description: 'Pay when your order arrives',
-      popular: true
+      description: 'Pay when order arrives (+₹40)',
+      popular: true,
+      instant: false
     }
   ];
 
@@ -74,9 +81,15 @@ const PaymentGateway = ({ orderTotal = 1299, onPaymentSuccess }) => {
   ];
 
   const handlePayment = async () => {
+    if (selectedMethod === 'upi') {
+      // Navigate to UPI payment page
+      navigate('/upi-payment');
+      return;
+    }
+
     setIsProcessing(true);
 
-    // Simulate payment processing
+    // Simulate payment processing for other methods
     setTimeout(() => {
       setIsProcessing(false);
       toast({
@@ -211,41 +224,58 @@ const PaymentGateway = ({ orderTotal = 1299, onPaymentSuccess }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Shield className="h-5 w-5 mr-2 text-green-600" />
-            Secure Payment
+    <div className="max-w-2xl mx-auto p-6 bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
+      <Card className="shadow-xl border-0">
+        <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
+          <CardTitle className="flex items-center text-xl">
+            <Shield className="h-6 w-6 mr-3" />
+            Secure Payment Gateway
           </CardTitle>
-          <div className="flex items-center justify-between">
-            <span className="text-2xl font-bold text-green-600">₹{orderTotal}</span>
-            <Badge variant="secondary" className="bg-green-100 text-green-800">
-              SSL Secured
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center">
+              <IndianRupee className="h-8 w-8 mr-2" />
+              <span className="text-3xl font-bold">{orderTotal}</span>
+            </div>
+            <Badge className="bg-white text-green-700 font-semibold">
+              🔒 SSL Secured
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        
+        <CardContent className="space-y-6 p-6">
           {/* Payment Methods */}
           <div>
-            <Label className="text-base font-medium mb-4 block">Choose Payment Method</Label>
+            <Label className="text-lg font-semibold mb-4 block text-gray-800">
+              Choose Payment Method
+            </Label>
             <RadioGroup value={selectedMethod} onValueChange={setSelectedMethod}>
               <div className="space-y-3">
                 {paymentMethods.map((method) => (
-                  <div key={method.id} className="flex items-center space-x-3 border rounded-lg p-3 hover:bg-gray-50">
-                    <RadioGroupItem value={method.id} id={method.id} />
-                    <div className="flex items-center space-x-3 flex-1">
-                      <div className="text-gray-600">{method.icon}</div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <Label htmlFor={method.id} className="font-medium cursor-pointer">
-                            {method.name}
-                          </Label>
-                          {method.popular && (
-                            <Badge variant="secondary" className="text-xs">Popular</Badge>
-                          )}
+                  <div key={method.id} className="relative">
+                    <div className="flex items-center space-x-4 border-2 rounded-xl p-4 hover:bg-green-50 hover:border-green-300 transition-all duration-200 cursor-pointer">
+                      <RadioGroupItem value={method.id} id={method.id} className="border-2" />
+                      <div className="flex items-center space-x-4 flex-1">
+                        <div className="text-green-600 bg-green-100 p-2 rounded-lg">
+                          {method.icon}
                         </div>
-                        <p className="text-sm text-gray-600">{method.description}</p>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3">
+                            <Label htmlFor={method.id} className="font-semibold cursor-pointer text-gray-800">
+                              {method.name}
+                            </Label>
+                            {method.popular && (
+                              <Badge className="bg-orange-500 text-white text-xs">
+                                Popular
+                              </Badge>
+                            )}
+                            {method.instant && (
+                              <Badge className="bg-green-500 text-white text-xs">
+                                Instant
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">{method.description}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -255,43 +285,36 @@ const PaymentGateway = ({ orderTotal = 1299, onPaymentSuccess }) => {
           </div>
 
           {/* Payment Form */}
-          <div className="border-t pt-6">
+          <div className="border-t-2 border-gray-100 pt-6">
             {renderPaymentForm()}
-          </div>
-
-          {/* Security Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center mb-2">
-              <Shield className="h-4 w-4 text-blue-600 mr-2" />
-              <span className="text-sm font-medium text-blue-800">Your payment is secure</span>
-            </div>
-            <p className="text-xs text-blue-700">
-              We use industry-standard encryption to protect your payment information. 
-              Your card details are never stored on our servers.
-            </p>
           </div>
 
           {/* Pay Button */}
           <Button 
             onClick={handlePayment}
             disabled={isProcessing}
-            className="w-full bg-green-600 hover:bg-green-700 text-lg py-6"
+            className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-lg py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
           >
             {isProcessing ? (
               <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
                 Processing Payment...
               </div>
             ) : (
               <div className="flex items-center justify-center">
                 {selectedMethod === 'cod' ? (
                   <>
-                    <Check className="h-5 w-5 mr-2" />
+                    <Check className="h-6 w-6 mr-3" />
                     Place Order (COD)
+                  </>
+                ) : selectedMethod === 'upi' ? (
+                  <>
+                    <IndianRupee className="h-6 w-6 mr-3" />
+                    Pay with UPI
                   </>
                 ) : (
                   <>
-                    <Shield className="h-5 w-5 mr-2" />
+                    <Shield className="h-6 w-6 mr-3" />
                     Pay ₹{orderTotal}
                   </>
                 )}
@@ -299,15 +322,36 @@ const PaymentGateway = ({ orderTotal = 1299, onPaymentSuccess }) => {
             )}
           </Button>
 
-          {/* Accepted Cards */}
-          {selectedMethod === 'cards' && (
-            <div className="flex justify-center space-x-4 pt-4 border-t">
-              <span className="text-xs text-gray-600">We accept:</span>
-              <div className="flex space-x-2">
-                {['Visa', 'Mastercard', 'RuPay', 'Maestro'].map((card) => (
-                  <Badge key={card} variant="outline" className="text-xs">
-                    {card}
-                  </Badge>
+          {/* Trust Indicators */}
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+            <div className="flex items-center justify-center mb-3">
+              <Shield className="h-5 w-5 text-blue-600 mr-2" />
+              <span className="font-semibold text-blue-800">100% Secure Payment</span>
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-xs text-blue-700">
+              <div className="text-center">
+                <p className="font-medium">🛡️ Bank Level Security</p>
+                <p>256-bit SSL encryption</p>
+              </div>
+              <div className="text-center">
+                <p className="font-medium">🏪 Trusted by 10L+ Farmers</p>
+                <p>RBI approved gateway</p>
+              </div>
+            </div>
+          </div>
+
+          {/* UPI Apps for UPI method */}
+          {selectedMethod === 'upi' && (
+            <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4">
+              <h4 className="font-semibold text-green-800 mb-3 text-center">
+                Supported UPI Apps
+              </h4>
+              <div className="grid grid-cols-4 gap-3">
+                {['Google Pay', 'PhonePe', 'Paytm', 'BHIM'].map((app) => (
+                  <div key={app} className="text-center p-2 bg-white rounded-lg shadow-sm">
+                    <Smartphone className="h-6 w-6 mx-auto mb-1 text-green-600" />
+                    <p className="text-xs font-medium text-gray-700">{app}</p>
+                  </div>
                 ))}
               </div>
             </div>

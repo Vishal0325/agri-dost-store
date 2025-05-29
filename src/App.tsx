@@ -12,6 +12,7 @@ import Cart from "./pages/Cart";
 import Blog from "./pages/Blog";
 import ProductUpload from "./pages/ProductUpload";
 import PurchaseHistory from "./pages/PurchaseHistory";
+import UpiPayment from "./pages/UpiPayment";
 import NotFound from "./pages/NotFound";
 import React from "react";
 
@@ -41,6 +42,8 @@ const App = () => {
               <Route path="/blog" element={<Blog />} />
               <Route path="/admin/products" element={<ProductUpload />} />
               <Route path="/category/:category" element={<Products />} />
+              <Route path="/upi-payment" element={<UpiPayment />} />
+              <Route path="/purchase-history" element={<PurchaseHistory />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
