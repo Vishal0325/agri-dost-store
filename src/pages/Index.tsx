@@ -82,6 +82,138 @@ const HomePage = () => {
       image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
       discount: "15% OFF",
       badge: "Eco-Friendly"
+    },
+    {
+      id: 5,
+      name: "Cucumber Seeds",
+      price: "₹320",
+      originalPrice: "₹400",
+      rating: 4.4,
+      reviews: 92,
+      image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3",
+      discount: "20% OFF",
+      badge: "Best Seller"
+    },
+    {
+      id: 6,
+      name: "Phosphorus Fertilizer",
+      price: "₹850",
+      originalPrice: "₹1,000",
+      rating: 4.6,
+      reviews: 78,
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
+      discount: "15% OFF",
+      badge: "Organic"
+    },
+    {
+      id: 7,
+      name: "Garden Pruning Shears",
+      price: "₹1,200",
+      originalPrice: "₹1,500",
+      rating: 4.7,
+      reviews: 56,
+      image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3",
+      discount: "20% OFF",
+      badge: "Premium"
+    },
+    {
+      id: 8,
+      name: "Insect Repellent",
+      price: "₹650",
+      originalPrice: "₹800",
+      rating: 4.2,
+      reviews: 43,
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
+      discount: "18% OFF",
+      badge: "Natural"
+    },
+    {
+      id: 9,
+      name: "Carrot Seeds",
+      price: "₹280",
+      originalPrice: "₹350",
+      rating: 4.5,
+      reviews: 101,
+      image: "https://images.unsplash.com/photo-1445282768818-728615cc910a?ixlib=rb-4.0.3",
+      discount: "20% OFF",
+      badge: "Best Seller"
+    },
+    {
+      id: 10,
+      name: "Potassium Fertilizer",
+      price: "₹950",
+      originalPrice: "₹1,200",
+      rating: 4.6,
+      reviews: 65,
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
+      discount: "21% OFF",
+      badge: "New Arrival"
+    },
+    {
+      id: 11,
+      name: "Watering Can",
+      price: "₹750",
+      originalPrice: "₹900",
+      rating: 4.3,
+      reviews: 38,
+      image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3",
+      discount: "16% OFF",
+      badge: "Eco-Friendly"
+    },
+    {
+      id: 12,
+      name: "Fungicide Spray",
+      price: "₹720",
+      originalPrice: "₹900",
+      rating: 4.4,
+      reviews: 72,
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
+      discount: "20% OFF",
+      badge: "Premium"
+    },
+    {
+      id: 13,
+      name: "Bell Pepper Seeds",
+      price: "₹380",
+      originalPrice: "₹450",
+      rating: 4.7,
+      reviews: 87,
+      image: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?ixlib=rb-4.0.3",
+      discount: "15% OFF",
+      badge: "Organic"
+    },
+    {
+      id: 14,
+      name: "Calcium Fertilizer",
+      price: "₹1,100",
+      originalPrice: "₹1,400",
+      rating: 4.5,
+      reviews: 54,
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
+      discount: "21% OFF",
+      badge: "Best Seller"
+    },
+    {
+      id: 15,
+      name: "Garden Hoe",
+      price: "₹1,500",
+      originalPrice: "₹1,800",
+      rating: 4.8,
+      reviews: 29,
+      image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3",
+      discount: "16% OFF",
+      badge: "Premium"
+    },
+    {
+      id: 16,
+      name: "Herbicide Spray",
+      price: "₹890",
+      originalPrice: "₹1,100",
+      rating: 4.3,
+      reviews: 61,
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
+      discount: "19% OFF",
+      badge: "Natural"
     }
   ];
 
@@ -219,7 +351,7 @@ const HomePage = () => {
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">{t('categories.title')}</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-4 gap-6">
             {categories.map((category) => {
               const IconComponent = category.icon;
               return (
@@ -254,7 +386,7 @@ const HomePage = () => {
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-4 gap-6">
             {featuredProducts.map((product) => (
               <Card key={product.id} className="group hover:shadow-lg transition-shadow duration-300">
                 <div className="relative">
@@ -267,6 +399,8 @@ const HomePage = () => {
                     product.badge === 'Best Seller' ? 'bg-orange-500' :
                     product.badge === 'New Arrival' ? 'bg-blue-500' :
                     product.badge === 'Premium' ? 'bg-purple-500' :
+                    product.badge === 'Organic' ? 'bg-green-500' :
+                    product.badge === 'Natural' ? 'bg-emerald-500' :
                     'bg-green-500'
                   }`}>
                     {product.badge}
