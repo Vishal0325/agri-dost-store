@@ -5,9 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import LoginModal from '@/components/LoginModal';
+import DeliveryTimer from '@/components/DeliveryTimer';
+
+interface CustomerData {
+  name: string;
+  village: string;
+  ward: string;
+  mobile: string;
+}
 
 const HomePage = () => {
   const [currentBanner, setCurrentBanner] = useState(0);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [customerData, setCustomerData] = useState<CustomerData | null>(null);
   const { language, setLanguage, t } = useLanguage();
 
   const banners = [
@@ -228,6 +239,14 @@ const HomePage = () => {
     setLanguage(e.target.value as 'en' | 'hi');
   };
 
+  const handleLoginClick = () => {
+    setIsLoginModalOpen(true);
+  };
+
+  const handleLogin = (userData: CustomerData) => {
+    setCustomerData(userData);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -276,9 +295,13 @@ const HomePage = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="flex items-center space-x-1">
+              <Button 
+                variant="ghost" 
+                className="flex items-center space-x-1"
+                onClick={handleLoginClick}
+              >
                 <User className="h-5 w-5" />
-                <span>{t('header.login')}</span>
+                <span>{customerData ? customerData.name : t('header.login')}</span>
               </Button>
               <Button variant="ghost" className="flex items-center space-x-1 relative">
                 <ShoppingCart className="h-5 w-5" />
@@ -306,6 +329,17 @@ const HomePage = () => {
           </nav>
         </div>
       </header>
+
+      {/* Customer Delivery Timer */}
+      {customerData && (
+        <div className="container mx-auto px-4 py-4">
+          <DeliveryTimer 
+            customerName={customerData.name}
+            village={customerData.village}
+            ward={customerData.ward}
+          />
+        </div>
+      )}
 
       {/* Hero Banner */}
       <section className="relative h-96 overflow-hidden">
@@ -570,6 +604,13 @@ const HomePage = () => {
           <MessageCircle className="h-6 w-6" />
         </Button>
       </div>
+
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLogin={handleLogin}
+      />
     </div>
   );
 };
