@@ -1,13 +1,18 @@
 
 import React, { useState } from 'react';
-import { Plus, Minus, Trash2, ShoppingBag, ArrowRight, Tag } from 'lucide-react';
+import { Plus, Minus, Trash2, ShoppingBag, ArrowRight, Tag, Download, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 const CartPage = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
@@ -78,6 +83,73 @@ const CartPage = () => {
     : 0;
   const total = subtotal + shippingCost - couponDiscount;
 
+  const generateInvoice = () => {
+    const invoiceData = {
+      invoiceNumber: `INV-${Date.now()}`,
+      date: new Date().toLocaleDateString(),
+      items: cartItems,
+      subtotal,
+      savings,
+      shippingCost,
+      couponDiscount,
+      total,
+      customerData: JSON.parse(localStorage.getItem('customerData') || '{}')
+    };
+    
+    // Save to purchase history
+    const existingHistory = JSON.parse(localStorage.getItem('purchaseHistory') || '[]');
+    existingHistory.unshift(invoiceData);
+    localStorage.setItem('purchaseHistory', JSON.stringify(existingHistory));
+    
+    // Generate and download invoice
+    const invoiceContent = `
+AGRI SHOP INVOICE
+==================
+Invoice Number: ${invoiceData.invoiceNumber}
+Date: ${invoiceData.date}
+Customer: ${invoiceData.customerData.name || 'Guest'}
+Village: ${invoiceData.customerData.village || 'N/A'}
+Ward: ${invoiceData.customerData.ward || 'N/A'}
+Mobile: ${invoiceData.customerData.mobile || 'N/A'}
+
+ITEMS:
+------
+${cartItems.map(item => `${item.name} x${item.quantity} - ₹${(item.price * item.quantity).toLocaleString()}`).join('\n')}
+
+SUMMARY:
+--------
+Subtotal: ₹${subtotal.toLocaleString()}
+Savings: -₹${savings.toLocaleString()}
+Shipping: ₹${shippingCost}
+${appliedCoupon ? `Coupon Discount: -₹${couponDiscount.toLocaleString()}` : ''}
+TOTAL: ₹${total.toLocaleString()}
+
+Thank you for shopping with Agri Shop!
+    `;
+    
+    const blob = new Blob([invoiceContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice-${invoiceData.invoiceNumber}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCheckout = () => {
+    generateInvoice();
+    setCartItems([]);
+    toast({
+      title: "Order Placed Successfully!",
+      description: "Your invoice has been generated and order placed.",
+    });
+    navigate('/');
+  };
+
+  const handleContinueShopping = () => {
+    navigate('/products');
+  };
+
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -85,7 +157,10 @@ const CartPage = () => {
           <ShoppingBag className="h-24 w-24 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
           <p className="text-gray-600 mb-6">Add some products to your cart to continue shopping</p>
-          <Button className="bg-green-600 hover:bg-green-700">
+          <Button 
+            className="bg-green-600 hover:bg-green-700"
+            onClick={handleContinueShopping}
+          >
             Continue Shopping
           </Button>
         </div>
@@ -96,7 +171,17 @@ const CartPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart ({cartItems.length} items)</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Shopping Cart ({cartItems.length} items)</h1>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/purchase-history')}
+            className="flex items-center gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            Purchase History
+          </Button>
+        </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
@@ -259,16 +344,32 @@ const CartPage = () => {
                   </div>
                 )}
                 
-                <Button className="w-full mt-6 bg-green-600 hover:bg-green-700 text-lg py-3">
+                <Button 
+                  className="w-full mt-6 bg-green-600 hover:bg-green-700 text-lg py-3"
+                  onClick={handleCheckout}
+                >
                   Proceed to Checkout
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 
                 <div className="mt-4 text-center">
-                  <Button variant="outline" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={handleContinueShopping}
+                  >
                     Continue Shopping
                   </Button>
                 </div>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-2"
+                  onClick={generateInvoice}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Invoice
+                </Button>
                 
                 {/* Payment Methods */}
                 <div className="mt-6">

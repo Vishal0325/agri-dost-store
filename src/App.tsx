@@ -11,6 +11,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Blog from "./pages/Blog";
 import ProductUpload from "./pages/ProductUpload";
+import PurchaseHistory from "./pages/PurchaseHistory";
 import NotFound from "./pages/NotFound";
 import React from "react";
 
