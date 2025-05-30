@@ -181,37 +181,32 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - Updated with all categories */}
         <nav className="border-t border-green-500 bg-green-700">
           <div className="container mx-auto px-4">
-            <div className="flex items-center justify-center space-x-8 py-3">
-              {[
-                { name: t('nav.seeds'), icon: Leaf },
-                { name: t('nav.fertilizers'), icon: Crown },
-                { name: t('nav.pesticides'), icon: Gift },
-                { name: t('nav.tools'), icon: Star },
-                { name: t('nav.offers'), icon: Heart },
-                { name: t('nav.blog'), icon: User }
-              ].map((item, index) => {
-                const Icon = item.icon;
+            <div className="flex items-center justify-center space-x-6 py-3 flex-wrap">
+              {categories.map((category) => {
+                const Icon = category.icon;
                 return (
                   <Button 
-                    key={index}
+                    key={category.id}
                     variant="ghost" 
-                    className="text-white hover:bg-green-600 hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2"
-                    onClick={() => {
-                      if (item.name === t('nav.blog')) {
-                        navigate('/blog');
-                      } else {
-                        navigate('/products');
-                      }
-                    }}
+                    className="text-white hover:bg-green-600 hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2 text-sm"
+                    onClick={() => navigate('/products')}
                   >
                     <Icon className="h-4 w-4" />
-                    <span>{item.name}</span>
+                    <span className="hidden md:inline">{category.name}</span>
                   </Button>
                 );
               })}
+              <Button 
+                variant="ghost" 
+                className="text-white hover:bg-green-600 hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2"
+                onClick={() => navigate('/blog')}
+              >
+                <User className="h-4 w-4" />
+                <span className="hidden md:inline">{t('nav.blog')}</span>
+              </Button>
             </div>
           </div>
         </nav>
@@ -384,7 +379,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Footer - Updated with all categories */}
       <footer className="bg-gradient-to-r from-green-800 to-green-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -409,12 +404,20 @@ const Index = () => {
               </ul>
             </div>
             <div>
-              <h5 className="font-semibold mb-4">Categories</h5>
+              <h5 className="font-semibold mb-4">Product Categories</h5>
               <ul className="space-y-2 text-green-200">
-                <li><a href="#" className="hover:text-white transition-colors">Seeds</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Fertilizers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Tools</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Equipment</a></li>
+                {categories.map((category) => (
+                  <li key={category.id}>
+                    <a 
+                      href="#" 
+                      className="hover:text-white transition-colors flex items-center space-x-2"
+                      onClick={() => navigate('/products')}
+                    >
+                      <category.icon className="h-3 w-3" />
+                      <span>{category.name}</span>
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
             <div>
