@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { CreditCard, Smartphone, Banknote, Wallet, Shield, Check, IndianRupee } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
-const PaymentGateway = ({ orderTotal = 1299, onPaymentSuccess }) => {
+const PaymentGateway = ({ orderTotal = 1299, onPaymentSuccess }: { orderTotal?: number; onPaymentSuccess?: () => void }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [selectedMethod, setSelectedMethod] = useState('upi');
@@ -96,7 +95,13 @@ const PaymentGateway = ({ orderTotal = 1299, onPaymentSuccess }) => {
         title: "Payment Successful!",
         description: `₹${orderTotal} paid successfully via ${paymentMethods.find(m => m.id === selectedMethod)?.name}`,
       });
-      onPaymentSuccess?.();
+      
+      // Call onPaymentSuccess if provided, otherwise navigate to home
+      if (onPaymentSuccess) {
+        onPaymentSuccess();
+      } else {
+        navigate('/');
+      }
     }, 3000);
   };
 
