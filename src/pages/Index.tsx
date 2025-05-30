@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart } from 'lucide-react';
+import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Seed, SprayCan, Tools } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,31 +16,51 @@ const Index = () => {
   const categories = [
     {
       id: 1,
-      name: t('nav.seeds'),
+      name: "बीज (Seeds)",
+      icon: Seed,
       image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3",
       count: "500+ varieties",
       bgColor: "from-green-400 to-green-600"
     },
     {
       id: 2,
-      name: t('nav.fertilizers'),
+      name: "PGR (Plant Growth Regulator)",
+      icon: Leaf,
       image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
-      count: "200+ products",
-      bgColor: "from-amber-400 to-orange-600"
+      count: "100+ products",
+      bgColor: "from-blue-400 to-blue-600"
     },
     {
       id: 3,
-      name: t('nav.pesticides'),
+      name: "कीटनाशक (Pesticides)",
+      icon: SprayCan,
       image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
-      count: "150+ solutions",
+      count: "200+ solutions",
       bgColor: "from-red-400 to-red-600"
     },
     {
       id: 4,
-      name: t('nav.tools'),
+      name: "खरपतवारनाशी (Herbicide)",
+      icon: Crown,
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
+      count: "150+ products",
+      bgColor: "from-purple-400 to-purple-600"
+    },
+    {
+      id: 5,
+      name: "स्प्रे मशीन (Spray Machine)",
+      icon: SprayCan,
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
+      count: "80+ machines",
+      bgColor: "from-orange-400 to-orange-600"
+    },
+    {
+      id: 6,
+      name: "उपकरण (Tools)",
+      icon: Tools,
       image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
       count: "300+ tools",
-      bgColor: "from-blue-400 to-blue-600"
+      bgColor: "from-amber-400 to-amber-600"
     }
   ];
 
@@ -246,54 +267,51 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Categories Section */}
-      <section className="py-16 bg-white">
+      {/* Categories Section - Updated with new categories */}
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h3 className="text-4xl font-bold text-gray-900 mb-4">{t('categories.title')}</h3>
-            <p className="text-xl text-gray-600">Discover our wide range of premium agricultural products</p>
+          <div className="text-center mb-16">
+            <h3 className="text-4xl font-bold text-gray-900 mb-6">उत्पाद श्रेणियां</h3>
+            <p className="text-xl text-gray-600">हमारे प्रीमियम कृषि उत्पादों की विस्तृत श्रृंखला देखें</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {categories.map((category) => (
-              <Card 
-                key={category.id} 
-                className="group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border-0 overflow-hidden"
-                onClick={() => navigate('/products')}
-              >
-                <CardContent className="p-0">
-                  <div className={`bg-gradient-to-br ${category.bgColor} p-6 text-white relative overflow-hidden`}>
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-white/20 rounded-full -mr-10 -mt-10"></div>
-                    <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/20 rounded-full -ml-8 -mb-8"></div>
-                    <div className="relative z-10">
-                      <h4 className="text-xl font-bold mb-2">{category.name}</h4>
-                      <p className="text-sm opacity-90">{category.count}</p>
-                      <div className="mt-4">
-                        <ArrowRight className="h-6 w-6 transform group-hover:translate-x-2 transition-transform duration-300" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {categories.map((category) => {
+              const IconComponent = category.icon;
+              return (
+                <Card 
+                  key={category.id} 
+                  className="group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border-0 overflow-hidden"
+                  onClick={() => navigate('/products')}
+                >
+                  <CardContent className="p-0">
+                    <div className={`bg-gradient-to-br ${category.bgColor} p-8 text-white relative overflow-hidden`}>
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-white/20 rounded-full -mr-10 -mt-10"></div>
+                      <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/20 rounded-full -ml-8 -mb-8"></div>
+                      <div className="relative z-10 text-center">
+                        <IconComponent className="h-12 w-12 mx-auto mb-4" />
+                        <h4 className="text-xl font-bold mb-2">{category.name}</h4>
+                        <p className="text-sm opacity-90">{category.count}</p>
+                        <div className="mt-4">
+                          <ArrowRight className="h-6 w-6 mx-auto transform group-hover:translate-x-2 transition-transform duration-300" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="p-4">
-                    <img 
-                      src={category.image} 
-                      alt={category.name}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="py-16 bg-gradient-to-br from-gray-50 to-green-50">
+      {/* Featured Products - Updated to 2x2 grid */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-green-50">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h3 className="text-4xl font-bold text-gray-900 mb-4">{t('products.title')}</h3>
-            <p className="text-xl text-gray-600">Handpicked products for maximum yield and quality</p>
+          <div className="text-center mb-16">
+            <h3 className="text-4xl font-bold text-gray-900 mb-6">विशेष उत्पाद</h3>
+            <p className="text-xl text-gray-600">अधिकतम उत्पादन और गुणवत्ता के लिए हस्तचयनित उत्पाद</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {products.map((product) => (
               <Card 
                 key={product.id} 
@@ -305,7 +323,7 @@ const Index = () => {
                     <img 
                       src={product.image} 
                       alt={product.name}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-64 object-cover"
                     />
                     <Badge className="absolute top-3 left-3 bg-red-500 text-white font-semibold">
                       -{product.discount}%
@@ -320,10 +338,10 @@ const Index = () => {
                     </div>
                   </div>
                   <div className="p-6">
-                    <h4 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">
+                    <h4 className="font-bold text-xl mb-3 group-hover:text-green-600 transition-colors">
                       {product.name}
                     </h4>
-                    <div className="flex items-center mb-3">
+                    <div className="flex items-center mb-4">
                       <div className="flex text-yellow-400 mr-2">
                         {[...Array(5)].map((_, i) => (
                           <Star key={i} className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'fill-current' : ''}`} />
@@ -331,22 +349,22 @@ const Index = () => {
                       </div>
                       <span className="text-sm text-gray-600">({product.reviews})</span>
                     </div>
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-6">
                       <div className="space-y-1">
                         <div className="flex items-center space-x-2">
-                          <span className="text-2xl font-bold text-green-600">₹{product.price.toLocaleString()}</span>
-                          <span className="text-sm text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
+                          <span className="text-3xl font-bold text-green-600">₹{product.price.toLocaleString()}</span>
+                          <span className="text-lg text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
                     <Button 
-                      className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-2 rounded-full transform hover:scale-105 transition-all duration-200"
+                      className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 rounded-full transform hover:scale-105 transition-all duration-200"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate('/cart');
                       }}
                     >
-                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      <ShoppingCart className="h-5 w-5 mr-2" />
                       {t('products.addToCart')}
                     </Button>
                   </div>
@@ -360,7 +378,7 @@ const Index = () => {
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-full shadow-xl transform hover:scale-105 transition-all duration-300"
               onClick={() => navigate('/products')}
             >
-              View All Products
+              सभी उत्पाद देखें
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>

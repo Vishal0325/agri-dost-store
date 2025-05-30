@@ -10,15 +10,15 @@ interface ProductListProps {
 }
 
 const ProductList = ({ products, onDeleteProduct }: ProductListProps) => {
-  // Display only first 8 products for 2x4 grid
-  const displayProducts = products.slice(0, 8);
+  // Display only first 4 products for 2x2 grid
+  const displayProducts = products.slice(0, 4);
 
   return (
     <Card className="w-full">
       <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
         <CardTitle className="flex items-center justify-between">
-          <span>उत्पाद सूची ({displayProducts.length}/8)</span>
-          <span className="text-sm font-normal opacity-90">2×4 ग्रिड व्यू</span>
+          <span>उत्पाद सूची ({displayProducts.length}/4)</span>
+          <span className="text-sm font-normal opacity-90">2×2 ग्रिड व्यू</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
@@ -28,7 +28,7 @@ const ProductList = ({ products, onDeleteProduct }: ProductListProps) => {
             <p className="text-sm text-gray-400 mt-2">कृपया उत्पाद जोड़ें</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-fr">
+          <div className="grid grid-cols-2 gap-6 auto-rows-fr">
             {displayProducts.map((product) => (
               <div key={product.id} className="h-full">
                 <ProductCard
@@ -40,10 +40,10 @@ const ProductList = ({ products, onDeleteProduct }: ProductListProps) => {
           </div>
         )}
         
-        {products.length > 8 && (
+        {products.length > 4 && (
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              {products.length - 8} और उत्पाद उपलब्ध हैं
+              {products.length - 4} और उत्पाद उपलब्ध हैं
             </p>
           </div>
         )}
