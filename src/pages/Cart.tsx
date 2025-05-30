@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Minus, Trash2, ShoppingBag, ArrowRight, Tag, Download, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,10 +7,12 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const CartPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   
   const [cartItems, setCartItems] = useState([
     {
@@ -137,13 +138,8 @@ Thank you for shopping with Agri Shop!
   };
 
   const handleCheckout = () => {
-    generateInvoice();
-    setCartItems([]);
-    toast({
-      title: "Order Placed Successfully!",
-      description: "Your invoice has been generated and order placed.",
-    });
-    navigate('/');
+    // Navigate to payment gateway instead of generating invoice immediately
+    navigate('/payment');
   };
 
   const handleContinueShopping = () => {
@@ -155,13 +151,13 @@ Thank you for shopping with Agri Shop!
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <ShoppingBag className="h-24 w-24 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
-          <p className="text-gray-600 mb-6">Add some products to your cart to continue shopping</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('cart.empty')}</h2>
+          <p className="text-gray-600 mb-6">{t('cart.emptyDescription')}</p>
           <Button 
             className="bg-green-600 hover:bg-green-700"
             onClick={handleContinueShopping}
           >
-            Continue Shopping
+            {t('cart.continueShopping')}
           </Button>
         </div>
       </div>
@@ -172,14 +168,14 @@ Thank you for shopping with Agri Shop!
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Shopping Cart ({cartItems.length} items)</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('cart.title')} ({cartItems.length} {t('cart.items')})</h1>
           <Button 
             variant="outline" 
             onClick={() => navigate('/purchase-history')}
             className="flex items-center gap-2"
           >
             <FileText className="h-4 w-4" />
-            Purchase History
+            {t('cart.purchaseHistory')}
           </Button>
         </div>
         
@@ -206,7 +202,7 @@ Thank you for shopping with Agri Shop!
                               <p className="text-sm text-gray-600">{item.brand}</p>
                               <h3 className="font-semibold text-lg">{item.name}</h3>
                               {!item.inStock && (
-                                <Badge variant="destructive" className="mt-1">Out of Stock</Badge>
+                                <Badge variant="destructive" className="mt-1">{t('cart.outOfStock')}</Badge>
                               )}
                             </div>
                             <Button 
@@ -259,24 +255,24 @@ Thank you for shopping with Agri Shop!
                 
                 {/* Coupon Section */}
                 <div className="space-y-4">
-                  <h3 className="font-semibold">Apply Coupon</h3>
+                  <h3 className="font-semibold">{t('cart.applyCoupon')}</h3>
                   <div className="flex space-x-2">
                     <Input 
-                      placeholder="Enter coupon code"
+                      placeholder={t('cart.enterCoupon')}
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value)}
                       className="flex-1"
                     />
                     <Button variant="outline" onClick={applyCoupon}>
                       <Tag className="h-4 w-4 mr-2" />
-                      Apply
+                      {t('cart.apply')}
                     </Button>
                   </div>
                   
                   {appliedCoupon && (
                     <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
                       <span className="text-green-700 font-medium">
-                        Coupon "{appliedCoupon.code}" applied!
+                        {t('cart.couponApplied')} "{appliedCoupon.code}"!
                       </span>
                       <Button 
                         variant="ghost" 
@@ -284,13 +280,13 @@ Thank you for shopping with Agri Shop!
                         onClick={() => setAppliedCoupon(null)}
                         className="text-green-700 hover:text-green-800"
                       >
-                        Remove
+                        {t('cart.remove')}
                       </Button>
                     </div>
                   )}
                   
                   <div className="text-sm text-gray-600">
-                    <p>Available coupons: SAVE10 (10% off), NEWUSER50 (₹50 off)</p>
+                    <p>{t('cart.availableCoupons')}: SAVE10 (10% off), NEWUSER50 (₹50 off)</p>
                   </div>
                 </div>
               </CardContent>
@@ -301,29 +297,29 @@ Thank you for shopping with Agri Shop!
           <div>
             <Card className="sticky top-4">
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">Order Summary</h3>
+                <h3 className="text-xl font-semibold mb-4">{t('cart.orderSummary')}</h3>
                 
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span>Subtotal ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
+                    <span>{t('cart.subtotal')} ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} {t('cart.items')})</span>
                     <span>₹{subtotal.toLocaleString()}</span>
                   </div>
                   
                   <div className="flex justify-between text-green-600">
-                    <span>Savings</span>
+                    <span>{t('cart.savings')}</span>
                     <span>-₹{savings.toLocaleString()}</span>
                   </div>
                   
                   <div className="flex justify-between">
-                    <span>Shipping</span>
+                    <span>{t('cart.shipping')}</span>
                     <span className={shippingCost === 0 ? 'text-green-600 font-medium' : ''}>
-                      {shippingCost === 0 ? 'FREE' : `₹${shippingCost}`}
+                      {shippingCost === 0 ? t('cart.free') : `₹${shippingCost}`}
                     </span>
                   </div>
                   
                   {appliedCoupon && (
                     <div className="flex justify-between text-green-600">
-                      <span>Coupon Discount</span>
+                      <span>{t('cart.couponDiscount')}</span>
                       <span>-₹{couponDiscount.toLocaleString()}</span>
                     </div>
                   )}
@@ -331,7 +327,7 @@ Thank you for shopping with Agri Shop!
                   <Separator />
                   
                   <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
+                    <span>{t('cart.total')}</span>
                     <span>₹{total.toLocaleString()}</span>
                   </div>
                 </div>
@@ -339,7 +335,7 @@ Thank you for shopping with Agri Shop!
                 {shippingCost > 0 && (
                   <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                     <p className="text-sm text-blue-700">
-                      Add ₹{(999 - subtotal).toLocaleString()} more to get FREE shipping!
+                      {t('cart.freeShippingMessage')} ₹{(999 - subtotal).toLocaleString()}!
                     </p>
                   </div>
                 )}
@@ -348,7 +344,7 @@ Thank you for shopping with Agri Shop!
                   className="w-full mt-6 bg-green-600 hover:bg-green-700 text-lg py-3"
                   onClick={handleCheckout}
                 >
-                  Proceed to Checkout
+                  {t('cart.proceedToCheckout')}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 
@@ -358,7 +354,7 @@ Thank you for shopping with Agri Shop!
                     className="w-full"
                     onClick={handleContinueShopping}
                   >
-                    Continue Shopping
+                    {t('cart.continueShopping')}
                   </Button>
                 </div>
                 
@@ -368,12 +364,12 @@ Thank you for shopping with Agri Shop!
                   onClick={generateInvoice}
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Invoice
+                  {t('cart.downloadInvoice')}
                 </Button>
                 
                 {/* Payment Methods */}
                 <div className="mt-6">
-                  <h4 className="font-medium mb-3">We Accept</h4>
+                  <h4 className="font-medium mb-3">{t('cart.weAccept')}</h4>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline">UPI</Badge>
                     <Badge variant="outline">COD</Badge>
@@ -384,7 +380,7 @@ Thank you for shopping with Agri Shop!
                 
                 {/* Security */}
                 <div className="mt-4 text-center text-sm text-gray-600">
-                  <p>🔒 Secure checkout with 256-bit SSL encryption</p>
+                  <p>🔒 {t('cart.secureCheckout')}</p>
                 </div>
               </CardContent>
             </Card>

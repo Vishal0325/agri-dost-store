@@ -13,6 +13,7 @@ import Blog from "./pages/Blog";
 import ProductUpload from "./pages/ProductUpload";
 import PurchaseHistory from "./pages/PurchaseHistory";
 import UpiPayment from "./pages/UpiPayment";
+import PaymentGateway from "./components/PaymentGateway";
 import NotFound from "./pages/NotFound";
 import React from "react";
 
@@ -42,6 +43,7 @@ const App = () => {
               <Route path="/blog" element={<Blog />} />
               <Route path="/admin/products" element={<ProductUpload />} />
               <Route path="/category/:category" element={<Products />} />
+              <Route path="/payment" element={<PaymentGateway />} />
               <Route path="/upi-payment" element={<UpiPayment />} />
               <Route path="/purchase-history" element={<PurchaseHistory />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
