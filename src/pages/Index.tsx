@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Seed, SprayCan, Tools } from 'lucide-react';
+import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Sprout, SprayCan, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,7 +16,7 @@ const Index = () => {
     {
       id: 1,
       name: "बीज (Seeds)",
-      icon: Seed,
+      icon: Sprout,
       image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3",
       count: "500+ varieties",
       bgColor: "from-green-400 to-green-600"
@@ -57,7 +56,7 @@ const Index = () => {
     {
       id: 6,
       name: "उपकरण (Tools)",
-      icon: Tools,
+      icon: Wrench,
       image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
       count: "300+ tools",
       bgColor: "from-amber-400 to-amber-600"
