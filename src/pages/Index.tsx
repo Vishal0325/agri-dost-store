@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Sprout, SprayCan, Wrench, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -229,6 +228,14 @@ const Index = () => {
                   </Button>
                 );
               })}
+              <Button 
+                variant="ghost" 
+                className="text-white hover:bg-green-600 hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2"
+                onClick={() => navigate('/crop-products')}
+              >
+                <Sprout className="h-4 w-4" />
+                <span className="hidden md:inline">फसल सुझाव</span>
+              </Button>
               <Button 
                 variant="ghost" 
                 className="text-white hover:bg-green-600 hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2"

@@ -1,62 +1,44 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
+import { LanguageProvider } from '@/contexts/LanguageContext';
+import { WalletProvider } from '@/contexts/WalletContext';
+import Index from '@/pages/Index';
+import Products from '@/pages/Products';
+import CropProducts from '@/pages/CropProducts';
+import ProductDetail from '@/pages/ProductDetail';
+import Cart from '@/pages/Cart';
+import ProductUpload from '@/pages/ProductUpload';
+import Blog from '@/pages/Blog';
+import PurchaseHistory from '@/pages/PurchaseHistory';
+import UpiPayment from '@/pages/UpiPayment';
+import NotFound from '@/pages/NotFound';
+import './App.css';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { LanguageProvider } from "./contexts/LanguageContext";
-import { WalletProvider } from "./contexts/WalletContext";
-import Index from "./pages/Index";
-import Products from "./pages/Products";
-import ProductDetail from "./pages/ProductDetail";
-import Cart from "./pages/Cart";
-import Blog from "./pages/Blog";
-import ProductUpload from "./pages/ProductUpload";
-import PurchaseHistory from "./pages/PurchaseHistory";
-import UpiPayment from "./pages/UpiPayment";
-import PaymentGateway from "./components/PaymentGateway";
-import NotFound from "./pages/NotFound";
-import React from "react";
-
-// Create the query client inside the App component to ensure proper React context
-const App = () => {
-  const [queryClient] = React.useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: 1,
-        refetchOnWindowFocus: false,
-      },
-    },
-  }));
-
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <WalletProvider>
-          <TooltipProvider>
+    <LanguageProvider>
+      <WalletProvider>
+        <Router>
+          <div className="min-h-screen bg-gray-50">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/crop-products" element={<CropProducts />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/upload" element={<ProductUpload />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/purchase-history" element={<PurchaseHistory />} />
+              <Route path="/upi-payment" element={<UpiPayment />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
             <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/admin/products" element={<ProductUpload />} />
-                <Route path="/category/:category" element={<Products />} />
-                <Route path="/payment" element={<PaymentGateway />} />
-                <Route path="/upi-payment" element={<UpiPayment />} />
-                <Route path="/purchase-history" element={<PurchaseHistory />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </WalletProvider>
-      </LanguageProvider>
-    </QueryClientProvider>
+          </div>
+        </Router>
+      </WalletProvider>
+    </LanguageProvider>
   );
-};
+}
 
 export default App;
