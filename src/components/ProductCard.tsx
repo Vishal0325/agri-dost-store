@@ -24,22 +24,26 @@ const ProductCard = ({ product, onDelete }: ProductCardProps) => {
   const handleWalletAction = () => {
     console.log('Wallet action for product:', product.id);
     
-    if (balance >= product.price) {
-      const success = deductMoney(product.price);
+    const productPrice = parseFloat(product.price);
+    
+    if (balance >= productPrice) {
+      const success = deductMoney(productPrice);
       if (success) {
         toast({
           title: "Purchase Successful!",
-          description: `You bought ${product.name} for ₹${product.price}`,
+          description: `You bought ${product.name} for ₹${productPrice}`,
         });
       }
     } else {
       toast({
         title: "Insufficient Balance",
-        description: `You need ₹${product.price - balance} more to buy this product`,
+        description: `You need ₹${productPrice - balance} more to buy this product`,
         variant: "destructive",
       });
     }
   };
+
+  const productPrice = parseFloat(product.price);
 
   return (
     <div className="border rounded-lg p-4 bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -100,7 +104,7 @@ const ProductCard = ({ product, onDelete }: ProductCardProps) => {
           <Button 
             size="sm" 
             className={`flex-1 text-xs ${
-              balance >= product.price 
+              balance >= productPrice 
                 ? 'bg-orange-500 hover:bg-orange-600 text-white' 
                 : 'bg-gray-400 text-white cursor-not-allowed'
             }`}
@@ -108,7 +112,7 @@ const ProductCard = ({ product, onDelete }: ProductCardProps) => {
             disabled={!product.inStock}
           >
             <Wallet className="h-3 w-3 mr-1" />
-            {balance >= product.price ? 'खरीदें' : 'अपर्याप्त बैलेंस'}
+            {balance >= productPrice ? 'खरीदें' : 'अपर्याप्त बैलेंस'}
           </Button>
         </div>
         
