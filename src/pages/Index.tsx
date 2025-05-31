@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Sprout, SprayCan, Wrench } from 'lucide-react';
+import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Sprout, SprayCan, Wrench, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,10 +9,14 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import WalletDisplay from '@/components/WalletDisplay';
+import { useWallet } from '@/contexts/WalletContext';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { balance, deductMoney } = useWallet();
+  const { toast } = useToast();
 
   const categories = [
     {
@@ -111,6 +115,26 @@ const Index = () => {
       discount: 17
     }
   ];
+
+  const handlePurchase = (product: any) => {
+    const productPrice = product.price;
+    
+    if (balance >= productPrice) {
+      const success = deductMoney(productPrice);
+      if (success) {
+        toast({
+          title: "Purchase Successful!",
+          description: `You bought ${product.name} for ₹${productPrice}`,
+        });
+      }
+    } else {
+      toast({
+        title: "Insufficient Balance",
+        description: `You need ₹${productPrice - balance} more to buy this product`,
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-orange-50">
@@ -233,6 +257,19 @@ const Index = () => {
               <p className="text-xl text-gray-600 leading-relaxed">
                 {t('hero.subtitle1')}
               </p>
+              
+              {/* Wallet Balance Display */}
+              <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-2xl shadow-xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm opacity-90">Your Wallet Balance</p>
+                    <p className="text-3xl font-bold">₹{balance.toLocaleString('en-IN')}</p>
+                  </div>
+                  <Wallet className="h-10 w-10 opacity-80" />
+                </div>
+                <p className="text-sm mt-2 opacity-75">Shop directly from your wallet!</p>
+              </div>
+              
               <div className="flex flex-wrap gap-4">
                 <Button 
                   size="lg" 
@@ -304,7 +341,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Products - Updated to 2x2 grid */}
+      {/* Featured Products - Updated to 2x2 grid with wallet integration */}
       <section className="py-20 bg-gradient-to-br from-gray-50 to-green-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -331,6 +368,13 @@ const Index = () => {
                     <Badge className="absolute top-3 right-3 bg-green-600 text-white">
                       {product.badge}
                     </Badge>
+                    {balance < product.price && (
+                      <div className="absolute bottom-3 left-3 right-3">
+                        <Badge className="w-full bg-orange-500 text-white text-center py-1">
+                          अपर्याप्त वॉलेट बैलेंस
+                        </Badge>
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <Button className="bg-white text-gray-900 hover:bg-gray-100">
                         Quick View
@@ -358,14 +402,19 @@ const Index = () => {
                       </div>
                     </div>
                     <Button 
-                      className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 rounded-full transform hover:scale-105 transition-all duration-200"
+                      className={`w-full font-semibold py-3 rounded-full transform hover:scale-105 transition-all duration-200 ${
+                        balance >= product.price 
+                          ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white' 
+                          : 'bg-gray-400 text-white cursor-not-allowed'
+                      }`}
+                      disabled={balance < product.price}
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate('/cart');
+                        handlePurchase(product);
                       }}
                     >
-                      <ShoppingCart className="h-5 w-5 mr-2" />
-                      {t('products.addToCart')}
+                      <Wallet className="h-5 w-5 mr-2" />
+                      {balance >= product.price ? `वॉलेट से खरीदें ₹${product.price}` : 'अपर्याप्त बैलेंस'}
                     </Button>
                   </div>
                 </CardContent>
