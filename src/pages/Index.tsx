@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import WalletDisplay from '@/components/WalletDisplay';
+import HeroSection from '@/components/HeroSection';
+import CategoryGrid from '@/components/CategoryGrid';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,6 +19,7 @@ const Index = () => {
   const { balance, deductMoney } = useWallet();
   const { toast } = useToast();
 
+  // ... keep existing code (categories array)
   const categories = [
     {
       id: 1,
@@ -68,6 +71,7 @@ const Index = () => {
     }
   ];
 
+  // ... keep existing code (products array and handlePurchase function)
   const products = [
     {
       id: 1,
@@ -210,7 +214,7 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Navigation - Updated with all categories */}
+        {/* Navigation */}
         <nav className="border-t border-green-500 bg-green-700">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-center space-x-6 py-3 flex-wrap">
@@ -250,103 +254,10 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-16 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-orange-600/10"></div>
-        <div className="container mx-auto px-4 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 text-sm font-semibold rounded-full">
-                🎉 {t('nav.offers')} - Limited Time!
-              </Badge>
-              <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-green-600 via-green-700 to-orange-600 bg-clip-text text-transparent leading-tight">
-                {t('hero.title1')}
-              </h2>
-              <p className="text-xl text-gray-600 leading-relaxed">
-                {t('hero.subtitle1')}
-              </p>
-              
-              {/* Wallet Balance Display */}
-              <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-2xl shadow-xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm opacity-90">Your Wallet Balance</p>
-                    <p className="text-3xl font-bold">₹{balance.toLocaleString('en-IN')}</p>
-                  </div>
-                  <Wallet className="h-10 w-10 opacity-80" />
-                </div>
-                <p className="text-sm mt-2 opacity-75">Shop directly from your wallet!</p>
-              </div>
-              
-              <div className="flex flex-wrap gap-4">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-lg px-8 py-4 rounded-full shadow-xl transform hover:scale-105 transition-all duration-300"
-                  onClick={() => navigate('/products')}
-                >
-                  {t('hero.cta1')}
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="border-2 border-orange-500 text-orange-600 hover:bg-orange-500 hover:text-white text-lg px-8 py-4 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300"
-                >
-                  Explore Offers
-                </Button>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-3xl p-8 shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                <img 
-                  src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3" 
-                  alt="Agricultural products"
-                  className="w-full h-80 object-cover rounded-2xl shadow-xl"
-                />
-              </div>
-              <div className="absolute -top-4 -right-4 bg-yellow-400 text-yellow-900 px-6 py-3 rounded-full font-bold text-lg shadow-xl animate-bounce">
-                20% OFF
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSection />
 
-      {/* Categories Section - Updated with new categories */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-gray-900 mb-6">उत्पाद श्रेणियां</h3>
-            <p className="text-xl text-gray-600">हमारे प्रीमियम कृषि उत्पादों की विस्तृत श्रृंखला देखें</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {categories.map((category) => {
-              const IconComponent = category.icon;
-              return (
-                <Card 
-                  key={category.id} 
-                  className="group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border-0 overflow-hidden"
-                  onClick={() => navigate('/products')}
-                >
-                  <CardContent className="p-0">
-                    <div className={`bg-gradient-to-br ${category.bgColor} p-8 text-white relative overflow-hidden`}>
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-white/20 rounded-full -mr-10 -mt-10"></div>
-                      <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/20 rounded-full -ml-8 -mb-8"></div>
-                      <div className="relative z-10 text-center">
-                        <IconComponent className="h-12 w-12 mx-auto mb-4" />
-                        <h4 className="text-xl font-bold mb-2">{category.name}</h4>
-                        <p className="text-sm opacity-90">{category.count}</p>
-                        <div className="mt-4">
-                          <ArrowRight className="h-6 w-6 mx-auto transform group-hover:translate-x-2 transition-transform duration-300" />
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      {/* Categories Section */}
+      <CategoryGrid />
 
       {/* Featured Products - Updated to 2x2 grid with wallet integration */}
       <section className="py-20 bg-gradient-to-br from-gray-50 to-green-50">
