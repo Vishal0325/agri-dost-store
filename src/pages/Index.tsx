@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Sprout, SprayCan, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import WalletDisplay from '@/components/WalletDisplay';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -129,6 +131,7 @@ const Index = () => {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
+                <WalletDisplay variant="header" />
                 <LanguageSwitcher />
                 <Button variant="ghost" size="sm" className="text-white hover:bg-green-700">
                   {t('header.login')}
@@ -168,16 +171,19 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Cart */}
-            <Button 
-              variant="ghost" 
-              className="relative p-3 hover:bg-green-700 rounded-full"
-              onClick={() => navigate('/cart')}
-            >
-              <ShoppingCart className="h-6 w-6" />
-              <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs">3</Badge>
-              <span className="ml-2 hidden md:inline">{t('header.cart')}</span>
-            </Button>
+            {/* Cart and Wallet */}
+            <div className="flex items-center space-x-4">
+              <WalletDisplay variant="inline" />
+              <Button 
+                variant="ghost" 
+                className="relative p-3 hover:bg-green-700 rounded-full"
+                onClick={() => navigate('/cart')}
+              >
+                <ShoppingCart className="h-6 w-6" />
+                <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs">3</Badge>
+                <span className="ml-2 hidden md:inline">{t('header.cart')}</span>
+              </Button>
+            </div>
           </div>
         </div>
 

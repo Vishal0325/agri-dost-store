@@ -4,6 +4,8 @@ import { Eye, Trash2, User, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Product } from '@/types/product';
+import { useWallet } from '@/contexts/WalletContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductCardProps {
   product: Product;
@@ -11,6 +13,9 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product, onDelete }: ProductCardProps) => {
+  const { balance, deductMoney } = useWallet();
+  const { toast } = useToast();
+
   const handleViewFarmerDetails = () => {
     console.log('View farmer details for product:', product.id);
     // Add farmer details modal logic here
@@ -18,7 +23,22 @@ const ProductCard = ({ product, onDelete }: ProductCardProps) => {
 
   const handleWalletAction = () => {
     console.log('Wallet action for product:', product.id);
-    // Add wallet functionality here
+    
+    if (balance >= product.price) {
+      const success = deductMoney(product.price);
+      if (success) {
+        toast({
+          title: "Purchase Successful!",
+          description: `You bought ${product.name} for ₹${product.price}`,
+        });
+      }
+    } else {
+      toast({
+        title: "Insufficient Balance",
+        description: `You need ₹${product.price - balance} more to buy this product`,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -79,12 +99,22 @@ const ProductCard = ({ product, onDelete }: ProductCardProps) => {
           </Button>
           <Button 
             size="sm" 
-            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white text-xs"
+            className={`flex-1 text-xs ${
+              balance >= product.price 
+                ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                : 'bg-gray-400 text-white cursor-not-allowed'
+            }`}
             onClick={handleWalletAction}
+            disabled={!product.inStock}
           >
             <Wallet className="h-3 w-3 mr-1" />
-            वॉलेट
+            {balance >= product.price ? 'खरीदें' : 'अपर्याप्त बैलेंस'}
           </Button>
+        </div>
+        
+        {/* Wallet Balance Indicator */}
+        <div className="text-xs text-gray-600 text-center">
+          वॉलेट बैलेंस: ₹{balance.toLocaleString('en-IN')}
         </div>
       </div>
     </div>

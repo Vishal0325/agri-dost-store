@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { WalletProvider } from "./contexts/WalletContext";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -31,26 +32,28 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/admin/products" element={<ProductUpload />} />
-              <Route path="/category/:category" element={<Products />} />
-              <Route path="/payment" element={<PaymentGateway />} />
-              <Route path="/upi-payment" element={<UpiPayment />} />
-              <Route path="/purchase-history" element={<PurchaseHistory />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <WalletProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/admin/products" element={<ProductUpload />} />
+                <Route path="/category/:category" element={<Products />} />
+                <Route path="/payment" element={<PaymentGateway />} />
+                <Route path="/upi-payment" element={<UpiPayment />} />
+                <Route path="/purchase-history" element={<PurchaseHistory />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </WalletProvider>
       </LanguageProvider>
     </QueryClientProvider>
   );
