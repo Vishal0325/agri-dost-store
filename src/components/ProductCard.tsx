@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { Eye, Trash2, User, Wallet } from 'lucide-react';
+import { Eye, Trash2, User, Wallet, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Product } from '@/types/product';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface ProductCardProps {
   product: Product;
@@ -15,14 +16,31 @@ interface ProductCardProps {
 const ProductCard = ({ product, onDelete }: ProductCardProps) => {
   const { balance, deductMoney } = useWallet();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleViewDetails = () => {
+    console.log('Viewing product details for:', product.id);
+    navigate(`/product/${product.id}`);
+  };
 
   const handleViewFarmerDetails = () => {
     console.log('View farmer details for product:', product.id);
-    // Add farmer details modal logic here
+    toast({
+      title: "किसान विवरण",
+      description: "किसान संपर्क जानकारी दिखाई जा रही है",
+    });
   };
 
-  const handleWalletAction = () => {
-    console.log('Wallet action for product:', product.id);
+  const handleAddToCart = () => {
+    console.log('Adding to cart:', product.id);
+    toast({
+      title: "कार्ट में जोड़ा गया!",
+      description: `${product.name} आपके कार्ट में जोड़ दिया गया है`,
+    });
+  };
+
+  const handleWalletPurchase = () => {
+    console.log('Wallet purchase for product:', product.id);
     
     const productPrice = parseFloat(product.price);
     
@@ -30,17 +48,26 @@ const ProductCard = ({ product, onDelete }: ProductCardProps) => {
       const success = deductMoney(productPrice);
       if (success) {
         toast({
-          title: "Purchase Successful!",
-          description: `You bought ${product.name} for ₹${productPrice}`,
+          title: "खरीदारी सफल!",
+          description: `आपने ${product.name} ₹${productPrice} में खरीदा`,
         });
       }
     } else {
       toast({
-        title: "Insufficient Balance",
-        description: `You need ₹${productPrice - balance} more to buy this product`,
+        title: "अपर्याप्त बैलेंस",
+        description: `इस उत्पाद को खरीदने के लिए ₹${productPrice - balance} और चाहिए`,
         variant: "destructive",
       });
     }
+  };
+
+  const handleDelete = () => {
+    console.log('Deleting product:', product.id);
+    onDelete(product.id);
+    toast({
+      title: "उत्पाद हटाया गया",
+      description: `${product.name} को सूची से हटा दिया गया`,
+    });
   };
 
   const productPrice = parseFloat(product.price);
@@ -61,13 +88,14 @@ const ProductCard = ({ product, onDelete }: ProductCardProps) => {
         </div>
         
         <div className="flex flex-col gap-1">
-          <Button size="sm" variant="outline" onClick={() => console.log('View details')}>
+          <Button size="sm" variant="outline" onClick={handleViewDetails}>
             <Eye className="h-3 w-3" />
           </Button>
           <Button
             size="sm"
             variant="outline"
-            onClick={() => onDelete(product.id)}
+            onClick={handleDelete}
+            className="text-red-600 hover:text-red-700"
           >
             <Trash2 className="h-3 w-3" />
           </Button>
@@ -108,13 +136,23 @@ const ProductCard = ({ product, onDelete }: ProductCardProps) => {
                 ? 'bg-orange-500 hover:bg-orange-600 text-white' 
                 : 'bg-gray-400 text-white cursor-not-allowed'
             }`}
-            onClick={handleWalletAction}
+            onClick={handleWalletPurchase}
             disabled={!product.inStock}
           >
             <Wallet className="h-3 w-3 mr-1" />
-            {balance >= productPrice ? 'खरीदें' : 'अपर्याप्त बैलेंस'}
+            {balance >= productPrice ? 'वॉलेट से खरीदें' : 'अपर्याप्त बैलेंस'}
           </Button>
         </div>
+        
+        {/* Add to Cart Button */}
+        <Button 
+          className="w-full bg-green-600 hover:bg-green-700 text-white"
+          onClick={handleAddToCart}
+          disabled={!product.inStock}
+        >
+          <ShoppingCart className="h-4 w-4 mr-2" />
+          कार्ट में जोड़ें
+        </Button>
         
         {/* Wallet Balance Indicator */}
         <div className="text-xs text-gray-600 text-center">

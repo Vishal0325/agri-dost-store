@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ArrowLeft, Star, ShoppingCart, Heart, Share2, Truck, Shield, MessageCircle, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,11 +5,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { useWallet } from '@/contexts/WalletContext';
 
 const ProductDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { balance, deductMoney } = useWallet();
 
   const product = {
     id: 1,
@@ -87,13 +92,65 @@ const ProductDetailPage = () => {
     }
   ];
 
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const handleAddToCart = () => {
+    console.log('Adding to cart:', product.name, 'Quantity:', quantity);
+    toast({
+      title: "कार्ट में जोड़ा गया!",
+      description: `${quantity} ${product.name} आपके कार्ट में जोड़ दिया गया है`,
+    });
+  };
+
+  const handleAddToWishlist = () => {
+    console.log('Adding to wishlist:', product.name);
+    toast({
+      title: "विशलिस्ट में जोड़ा गया!",
+      description: `${product.name} आपकी विशलिस्ट में जोड़ दिया गया है`,
+    });
+  };
+
+  const handleShare = () => {
+    console.log('Sharing product:', product.name);
+    if (navigator.share) {
+      navigator.share({
+        title: product.name,
+        text: `Check out this product: ${product.name}`,
+        url: window.location.href,
+      });
+    } else {
+      toast({
+        title: "लिंक कॉपी किया गया!",
+        description: "उत्पाद लिंक आपके क्लिपबोर्ड में कॉपी कर दिया गया है",
+      });
+    }
+  };
+
+  const handleWhatsAppSupport = () => {
+    console.log('Opening WhatsApp support');
+    toast({
+      title: "WhatsApp सपोर्ट",
+      description: "WhatsApp सपोर्ट खोला जा रहा है...",
+    });
+  };
+
+  const handleWriteReview = () => {
+    console.log('Opening review form');
+    toast({
+      title: "समीक्षा लिखें",
+      description: "समीक्षा फॉर्म खोला जा रहा है...",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center space-x-2 text-sm">
-            <Button variant="ghost" size="sm" className="p-0">
+            <Button variant="ghost" size="sm" className="p-0" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back
             </Button>
@@ -203,17 +260,28 @@ const ProductDetailPage = () => {
             </div>
 
             <div className="space-y-3 mb-6">
-              <Button className="w-full bg-green-600 hover:bg-green-700 text-lg py-3">
+              <Button 
+                className="w-full bg-green-600 hover:bg-green-700 text-lg py-3"
+                onClick={handleAddToCart}
+              >
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 Add to Cart - ₹{(450 * quantity).toLocaleString()}
               </Button>
               
               <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" className="flex items-center justify-center">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center justify-center"
+                  onClick={handleAddToWishlist}
+                >
                   <Heart className="h-4 w-4 mr-2" />
                   Add to Wishlist
                 </Button>
-                <Button variant="outline" className="flex items-center justify-center">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center justify-center"
+                  onClick={handleShare}
+                >
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
@@ -244,7 +312,11 @@ const ProductDetailPage = () => {
                     <p className="font-medium text-green-800">Need help choosing?</p>
                     <p className="text-sm text-green-600">Talk to our farming expert</p>
                   </div>
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                  <Button 
+                    size="sm" 
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={handleWhatsAppSupport}
+                  >
                     <MessageCircle className="h-4 w-4 mr-2" />
                     WhatsApp
                   </Button>
@@ -322,7 +394,9 @@ const ProductDetailPage = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-semibold">Customer Reviews</h3>
-                    <Button variant="outline">Write a Review</Button>
+                    <Button variant="outline" onClick={handleWriteReview}>
+                      Write a Review
+                    </Button>
                   </div>
                   
                   <div className="space-y-6">
