@@ -14,7 +14,6 @@ import CategoryGrid from '@/components/CategoryGrid';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/hooks/use-toast';
 import VoiceSearch from '@/components/VoiceSearch';
-import SearchResults from '@/components/SearchResults';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -154,11 +153,6 @@ const Index = () => {
     console.log('Search results:', filteredProducts);
     setSearchResults(filteredProducts);
     setShowSearchResults(true);
-    
-    toast({
-      title: "Search Complete",
-      description: `Found ${filteredProducts.length} products matching "${query}"`,
-    });
   };
 
   // Handle text search from button click
@@ -180,10 +174,10 @@ const Index = () => {
     console.log('Search input changed:', value);
     setSearchQuery(value);
     
-    // Perform instant search as user types (after 2 characters)
-    if (value.length > 2) {
+    // Perform instant search as user types (after 1 character)
+    if (value.length > 0) {
       performSearch(value);
-    } else if (value.length === 0) {
+    } else {
       setSearchResults([]);
       setShowSearchResults(false);
     }
@@ -197,6 +191,14 @@ const Index = () => {
     }
   };
 
+  // Handle clicking outside search to close dropdown
+  const handleSearchBlur = () => {
+    // Delay hiding results to allow clicking on them
+    setTimeout(() => {
+      setShowSearchResults(false);
+    }, 200);
+  };
+
   const handlePurchase = (product: any) => {
     const productPrice = product.price;
     
@@ -207,6 +209,7 @@ const Index = () => {
           title: "Purchase Successful!",
           description: `You bought ${product.name} for ₹${productPrice}`,
         });
+        setShowSearchResults(false); // Close search results after purchase
       }
     } else {
       toast({
@@ -267,31 +270,95 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Enhanced Search bar with Real-time Text and Voice Search */}
-            <div className="flex-1 max-w-2xl mx-8">
+            {/* Enhanced Search bar with Real-time Dropdown Results */}
+            <div className="flex-1 max-w-2xl mx-8 relative">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 z-10" />
                 <Input
                   placeholder={t('header.search')}
                   value={searchQuery}
                   onChange={handleSearchInputChange}
                   onKeyPress={handleKeyPress}
+                  onBlur={handleSearchBlur}
+                  onFocus={() => searchQuery && setShowSearchResults(true)}
                   className="w-full pl-10 pr-20 py-3 rounded-full border-0 shadow-lg focus:ring-2 focus:ring-yellow-400 text-gray-900 placeholder:text-gray-500"
                 />
-                <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
+                <div className="absolute right-12 top-1/2 transform -translate-y-1/2 z-10">
                   <VoiceSearch onSearchResults={handleVoiceSearch} />
                 </div>
                 <Button 
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 z-10"
                   onClick={handleTextSearch}
                 >
                   {t('common.search')}
                 </Button>
               </div>
-              {/* Real-time search feedback */}
-              {searchQuery && (
-                <div className="absolute top-full left-0 right-0 mt-1 text-xs text-green-200 bg-green-800/80 px-3 py-1 rounded-md backdrop-blur-sm">
-                  Searching for: "{searchQuery}"
+
+              {/* Dropdown Search Results */}
+              {showSearchResults && searchQuery && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
+                  {searchResults.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500">
+                      <p>No products found for "{searchQuery}"</p>
+                      <p className="text-sm text-gray-400 mt-1">Try different keywords</p>
+                    </div>
+                  ) : (
+                    <div className="p-2">
+                      <div className="text-xs text-gray-500 px-3 py-2 border-b">
+                        {searchResults.length} products found for "{searchQuery}"
+                      </div>
+                      {searchResults.map((product) => (
+                        <div key={product.id} className="p-3 hover:bg-gray-50 border-b last:border-b-0 cursor-pointer">
+                          <div className="flex items-center space-x-3">
+                            <img 
+                              src={product.image} 
+                              alt={product.name}
+                              className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-900 text-sm line-clamp-1">{product.name}</h4>
+                                  <div className="flex items-center mt-1">
+                                    <div className="flex text-yellow-400 mr-2">
+                                      {[...Array(5)].map((_, i) => (
+                                        <Star key={i} className={`h-3 w-3 ${i < Math.floor(product.rating) ? 'fill-current' : ''}`} />
+                                      ))}
+                                    </div>
+                                    <span className="text-xs text-gray-500">({product.reviews})</span>
+                                  </div>
+                                </div>
+                                <Badge className="ml-2 text-xs flex-shrink-0">{product.badge}</Badge>
+                              </div>
+                              <div className="flex items-center justify-between mt-2">
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-bold text-green-600">₹{product.price.toLocaleString()}</span>
+                                  <span className="text-sm text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
+                                  <Badge variant="secondary" className="text-xs">-{product.discount}%</Badge>
+                                </div>
+                                <Button 
+                                  size="sm"
+                                  className={`text-xs px-3 py-1 ${
+                                    balance >= product.price 
+                                      ? 'bg-green-600 hover:bg-green-700 text-white' 
+                                      : 'bg-gray-400 text-white cursor-not-allowed'
+                                  }`}
+                                  disabled={balance < product.price}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePurchase(product);
+                                  }}
+                                >
+                                  <Wallet className="h-3 w-3 mr-1" />
+                                  {balance >= product.price ? 'Buy' : 'Low Balance'}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -350,15 +417,6 @@ const Index = () => {
           </div>
         </nav>
       </header>
-
-      {/* Search Results Modal */}
-      {showSearchResults && (
-        <SearchResults 
-          query={searchQuery}
-          products={searchResults}
-          onClose={() => setShowSearchResults(false)}
-        />
-      )}
 
       {/* Hero Section */}
       <HeroSection />
