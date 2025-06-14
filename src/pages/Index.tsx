@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Sprout, SprayCan, Wrench, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,54 +20,53 @@ const Index = () => {
   const { balance, deductMoney } = useWallet();
   const { toast } = useToast();
 
-  // ... keep existing code (categories array)
   const categories = [
     {
       id: 1,
-      name: "बीज (Seeds)",
+      name: t('categories.seeds'),
       icon: Sprout,
       image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3",
-      count: "500+ varieties",
+      count: t('categories.seedsCount'),
       bgColor: "from-green-400 to-green-600"
     },
     {
       id: 2,
-      name: "PGR (Plant Growth Regulator)",
+      name: t('categories.pgr'),
       icon: Leaf,
       image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
-      count: "100+ products",
+      count: t('categories.pgrCount'),
       bgColor: "from-blue-400 to-blue-600"
     },
     {
       id: 3,
-      name: "कीटनाशक (Pesticides)",
+      name: t('categories.pesticides'),
       icon: SprayCan,
       image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
-      count: "200+ solutions",
+      count: t('categories.pesticidesCount'),
       bgColor: "from-red-400 to-red-600"
     },
     {
       id: 4,
-      name: "खरपतवारनाशी (Herbicide)",
+      name: t('categories.herbicide'),
       icon: Crown,
       image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
-      count: "150+ products",
+      count: t('categories.herbicideCount'),
       bgColor: "from-purple-400 to-purple-600"
     },
     {
       id: 5,
-      name: "स्प्रे मशीन (Spray Machine)",
+      name: t('categories.sprayMachine'),
       icon: SprayCan,
       image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
-      count: "80+ machines",
+      count: t('categories.sprayMachineCount'),
       bgColor: "from-orange-400 to-orange-600"
     },
     {
       id: 6,
-      name: "उपकरण (Tools)",
+      name: t('categories.tools'),
       icon: Wrench,
       image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
-      count: "300+ tools",
+      count: t('categories.toolsCount'),
       bgColor: "from-amber-400 to-amber-600"
     }
   ];
@@ -178,9 +178,9 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                  कृषि मार्ट
+                  {t('header.title')}
                 </h1>
-                <p className="text-sm text-green-200">Premium Agricultural Solutions</p>
+                <p className="text-sm text-green-200">{t('header.subtitle')}</p>
               </div>
             </div>
 
@@ -193,7 +193,7 @@ const Index = () => {
                   className="w-full pl-10 pr-4 py-3 rounded-full border-0 shadow-lg focus:ring-2 focus:ring-yellow-400"
                 />
                 <Button className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-                  Search
+                  {t('common.search')}
                 </Button>
               </div>
             </div>
@@ -238,7 +238,7 @@ const Index = () => {
                 onClick={() => navigate('/crop-products')}
               >
                 <Sprout className="h-4 w-4" />
-                <span className="hidden md:inline">फसल सुझाव</span>
+                <span className="hidden md:inline">{t('nav.cropSuggestions')}</span>
               </Button>
               <Button 
                 variant="ghost" 
@@ -259,11 +259,11 @@ const Index = () => {
       {/* Categories Section */}
       <CategoryGrid />
 
-      {/* Featured Products - Updated to 2x2 grid with wallet integration */}
+      {/* Featured Products - Updated with translations */}
       <section className="py-20 bg-gradient-to-br from-gray-50 to-green-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-gray-900 mb-6">विशेष उत्पाद</h3>
+            <h3 className="text-4xl font-bold text-gray-900 mb-6">{t('products.title')}</h3>
             <p className="text-xl text-gray-600">अधिकतम उत्पादन और गुणवत्ता के लिए हस्तचयनित उत्पाद</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -345,14 +345,14 @@ const Index = () => {
               className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-full shadow-xl transform hover:scale-105 transition-all duration-300"
               onClick={() => navigate('/products')}
             >
-              सभी उत्पाद देखें
+              {t('products.viewAll')}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Footer - Updated with all categories */}
+      {/* Footer - Updated with translations */}
       <footer className="bg-gradient-to-r from-green-800 to-green-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -361,23 +361,23 @@ const Index = () => {
                 <div className="bg-white p-2 rounded-full">
                   <Leaf className="h-6 w-6 text-green-600" />
                 </div>
-                <h4 className="text-xl font-bold">कृषि मार्ट</h4>
+                <h4 className="text-xl font-bold">{t('header.title')}</h4>
               </div>
               <p className="text-green-200">
-                Your trusted partner for premium agricultural solutions and farming success.
+                {t('header.subtitle')}
               </p>
             </div>
             <div>
-              <h5 className="font-semibold mb-4">Quick Links</h5>
+              <h5 className="font-semibold mb-4">{t('footer.quickLinks')}</h5>
               <ul className="space-y-2 text-green-200">
-                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">{t('footer.aboutUs')}</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">{t('footer.contact')}</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">{t('footer.support')}</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">{t('footer.terms')}</a></li>
               </ul>
             </div>
             <div>
-              <h5 className="font-semibold mb-4">Product Categories</h5>
+              <h5 className="font-semibold mb-4">{t('footer.productCategories')}</h5>
               <ul className="space-y-2 text-green-200">
                 {categories.map((category) => (
                   <li key={category.id}>
@@ -394,11 +394,11 @@ const Index = () => {
               </ul>
             </div>
             <div>
-              <h5 className="font-semibold mb-4">Contact Info</h5>
+              <h5 className="font-semibold mb-4">{t('footer.contactInfo')}</h5>
               <div className="space-y-2 text-green-200">
                 <p className="flex items-center">
                   <Phone className="h-4 w-4 mr-2" />
-                  1800-123-4567
+                  {t('header.phone')}
                 </p>
                 <p>📧 info@krishimart.com</p>
                 <p>📍 New Delhi, India</p>
@@ -406,7 +406,7 @@ const Index = () => {
             </div>
           </div>
           <div className="border-t border-green-700 mt-8 pt-8 text-center text-green-200">
-            <p>&copy; 2024 कृषि मार्ट. All rights reserved.</p>
+            <p>{t('footer.copyright')}</p>
           </div>
         </div>
       </footer>
