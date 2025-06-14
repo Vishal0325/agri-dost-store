@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLanguage } from './LanguageContext';
 
@@ -59,6 +58,7 @@ export const ChatbotProvider = ({ children }: { children: React.ReactNode }) => 
     farmSize: '',
     primaryCrops: []
   });
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   // Load profile from localStorage
   useEffect(() => {
@@ -66,6 +66,7 @@ export const ChatbotProvider = ({ children }: { children: React.ReactNode }) => 
     if (savedProfile) {
       setUserProfile(JSON.parse(savedProfile));
     }
+    setProfileLoaded(true);
   }, []);
 
   // Save profile to localStorage
@@ -75,35 +76,15 @@ export const ChatbotProvider = ({ children }: { children: React.ReactNode }) => 
 
   // Initial welcome message
   useEffect(() => {
-    if (messages.length === 0) {
-      const welcomeMessage = language === 'hi' 
-        ? 'नमस्ते! मैं आपका कृषि सहायक हूं। मैं आपकी प्रोफाइल अपडेट करने, खरीदारी का इतिहास दिखाने, और फसलों की जानकारी देने में मदद कर सकता हूं।'
-        : 'Hello! I am your agricultural assistant. I can help you update your profile, view purchase history, and get crop information.';
+    if (profileLoaded && messages.length === 0) {
+      const name = userProfile.name || (language === 'hi' ? 'किसान भाई' : 'Farmer');
+      const welcomeMessage = language === 'hi'
+        ? `नमस्ते ${name} जी! मैं आपकी क्या सहायता कर सकता हूँ? आप मौसम, फसल सलाह, या उत्पादों के बारे में पूछ सकते हैं।`
+        : `Namaste ${name}! How can I help you today? You can ask about weather, crop advice, or products.`;
       
-      const actions: ChatAction[] = [
-        {
-          id: 'profile',
-          label: 'Update Profile',
-          labelHindi: 'प्रोफाइल अपडेट करें',
-          action: () => handleProfileUpdate()
-        },
-        {
-          id: 'history',
-          label: 'Purchase History',
-          labelHindi: 'खरीदारी का इतिहास',
-          action: () => handlePurchaseHistory()
-        },
-        {
-          id: 'crops',
-          label: 'Crop Information',
-          labelHindi: 'फसल की जानकारी',
-          action: () => handleCropInfo()
-        }
-      ];
-
-      addMessage(welcomeMessage, 'bot', actions);
+      addMessage(welcomeMessage, 'bot');
     }
-  }, [language]);
+  }, [profileLoaded, language, userProfile.name]);
 
   const addMessage = (content: string, type: 'user' | 'bot', actions?: ChatAction[]) => {
     const newMessage: ChatMessage = {
@@ -125,6 +106,11 @@ export const ChatbotProvider = ({ children }: { children: React.ReactNode }) => 
 
   const clearChat = () => {
     setMessages([]);
+    const name = userProfile.name || (language === 'hi' ? 'किसान भाई' : 'Farmer');
+    const welcomeMessage = language === 'hi'
+      ? `नमस्ते ${name} जी! मैं आपकी क्या सहायता कर सकता हूँ? आप मौसम, फसल सलाह, या उत्पादों के बारे में पूछ सकते हैं।`
+      : `Namaste ${name}! How can I help you today? You can ask about weather, crop advice, or products.`;
+    addMessage(welcomeMessage, 'bot');
   };
 
   const handleProfileUpdate = () => {

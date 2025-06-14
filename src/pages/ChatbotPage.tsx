@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Send, User, Bot, Plus, MapPin, Cloud, Sun, CloudRain, Snowflake } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -12,6 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import ApiConfiguration from '@/components/ApiConfiguration';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 interface WeatherData {
   location: string;
@@ -253,7 +253,7 @@ const ChatbotPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Chat Section */}
           <div className="lg:col-span-2">
-            <Card className="h-[600px] flex flex-col">
+            <Card className="h-[75vh] flex flex-col">
               <CardHeader className="bg-gray-100">
                 <CardTitle className="flex items-center justify-between">
                   <span>{language === 'hi' ? 'चैट करें' : 'Chat'}</span>
@@ -275,41 +275,44 @@ const ChatbotPage = () => {
                 <ScrollArea className="flex-1 p-4">
                   <div className="space-y-4">
                     {messages.map((message) => (
-                      <div key={message.id} className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`flex gap-2 max-w-[80%] ${message.type === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            message.type === 'user' ? 'bg-blue-500' : 'bg-green-500'
-                          }`}>
-                            {message.type === 'user' ? (
-                              <User className="h-4 w-4 text-white" />
-                            ) : (
-                              <Bot className="h-4 w-4 text-white" />
-                            )}
-                          </div>
-                          <div className={`rounded-lg p-3 ${
-                            message.type === 'user' 
-                              ? 'bg-blue-500 text-white' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                            <p className="text-xs opacity-70 mt-1">
-                              {formatTimestamp(message.timestamp)}
-                            </p>
-                          </div>
+                      <div key={message.id} className={`flex items-end gap-2 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        {message.type === 'bot' && (
+                          <Avatar className="w-8 h-8">
+                            <AvatarFallback className="bg-green-600 text-white">
+                              <Bot className="h-4 w-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div className={`rounded-lg p-3 max-w-[80%] ${
+                          message.type === 'user' 
+                            ? 'bg-blue-600 text-white rounded-br-none' 
+                            : 'bg-gray-200 text-gray-800 rounded-bl-none'
+                        }`}>
+                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                          <p className={`text-xs mt-1 text-right ${message.type === 'user' ? 'text-blue-200' : 'text-gray-500'}`}>
+                            {formatTimestamp(message.timestamp)}
+                          </p>
                         </div>
+                        {message.type === 'user' && (
+                           <Avatar className="w-8 h-8">
+                            <AvatarFallback className="bg-blue-600 text-white">
+                              <User className="h-4 w-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                        )}
                       </div>
                     ))}
                     {isBotTyping && (
-                      <div className="flex gap-3 justify-start">
-                        <div className="flex gap-2 max-w-[80%] flex-row">
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-green-500">
-                            <Bot className="h-4 w-4 text-white" />
-                          </div>
-                          <div className="rounded-lg p-3 bg-gray-100 text-gray-800">
-                            <p className="text-sm animate-pulse">
-                              {language === 'hi' ? 'सोच रहा हूँ...' : 'Thinking...'}
-                            </p>
-                          </div>
+                      <div className="flex items-end gap-2 justify-start">
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback className="bg-green-600 text-white">
+                            <Bot className="h-4 w-4" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="rounded-lg p-3 bg-gray-200 text-gray-800 rounded-bl-none">
+                          <p className="text-sm animate-pulse">
+                            {language === 'hi' ? 'सोच रहा हूँ...' : 'Thinking...'}
+                          </p>
                         </div>
                       </div>
                     )}
