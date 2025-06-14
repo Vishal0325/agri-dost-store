@@ -21,11 +21,12 @@ const Index = () => {
   const { balance, deductMoney } = useWallet();
   const { toast } = useToast();
   
-  // Add state for voice search
-  const [voiceSearchQuery, setVoiceSearchQuery] = useState('');
+  // Add state for search functionality
+  const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
+  // ... keep existing code (categories array)
   const categories = [
     {
       id: 1,
@@ -77,6 +78,7 @@ const Index = () => {
     }
   ];
 
+  // ... keep existing code (products array)
   const products = [
     {
       id: 1,
@@ -124,11 +126,14 @@ const Index = () => {
     }
   ];
 
-  // Add voice search handler
-  const handleVoiceSearch = (query: string) => {
-    setVoiceSearchQuery(query);
-    
-    // Filter products based on voice search query
+  // Enhanced search function for both text and voice
+  const performSearch = (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
     const filteredProducts = products.filter(product => 
       product.name.toLowerCase().includes(query.toLowerCase()) ||
       product.badge.toLowerCase().includes(query.toLowerCase()) ||
@@ -138,11 +143,50 @@ const Index = () => {
       (query.toLowerCase().includes('organic') && product.name.toLowerCase().includes('organic')) ||
       (query.toLowerCase().includes('tomato') && product.name.toLowerCase().includes('tomato')) ||
       (query.toLowerCase().includes('wheat') && product.name.toLowerCase().includes('wheat')) ||
-      (query.toLowerCase().includes('rice') && product.name.toLowerCase().includes('rice'))
+      (query.toLowerCase().includes('rice') && product.name.toLowerCase().includes('rice')) ||
+      (query.toLowerCase().includes('smart') && product.name.toLowerCase().includes('smart')) ||
+      (query.toLowerCase().includes('irrigation') && product.name.toLowerCase().includes('irrigation'))
     );
     
     setSearchResults(filteredProducts);
     setShowSearchResults(true);
+    
+    toast({
+      title: "Search Complete",
+      description: `Found ${filteredProducts.length} products matching "${query}"`,
+    });
+  };
+
+  // Handle text search
+  const handleTextSearch = () => {
+    performSearch(searchQuery);
+  };
+
+  // Handle voice search
+  const handleVoiceSearch = (query: string) => {
+    setSearchQuery(query);
+    performSearch(query);
+  };
+
+  // Handle search input change
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    // Perform instant search as user types
+    if (value.length > 2) {
+      performSearch(value);
+    } else if (value.length === 0) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+    }
+  };
+
+  // Handle Enter key press
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleTextSearch();
+    }
   };
 
   const handlePurchase = (product: any) => {
@@ -215,18 +259,24 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Search bar with Voice Search */}
+            {/* Enhanced Search bar with Text and Voice Search */}
             <div className="flex-1 max-w-2xl mx-8">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <Input
                   placeholder={t('header.search')}
+                  value={searchQuery}
+                  onChange={handleSearchInputChange}
+                  onKeyPress={handleKeyPress}
                   className="w-full pl-10 pr-20 py-3 rounded-full border-0 shadow-lg focus:ring-2 focus:ring-yellow-400"
                 />
                 <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
                   <VoiceSearch onSearchResults={handleVoiceSearch} />
                 </div>
-                <Button className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+                <Button 
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                  onClick={handleTextSearch}
+                >
                   {t('common.search')}
                 </Button>
               </div>
@@ -287,10 +337,10 @@ const Index = () => {
         </nav>
       </header>
 
-      {/* Voice Search Results Modal */}
+      {/* Search Results Modal */}
       {showSearchResults && (
         <SearchResults 
-          query={voiceSearchQuery}
+          query={searchQuery}
           products={searchResults}
           onClose={() => setShowSearchResults(false)}
         />
@@ -302,7 +352,7 @@ const Index = () => {
       {/* Categories Section */}
       <CategoryGrid />
 
-      {/* Featured Products - Updated with translations */}
+      {/* Featured Products - keep existing implementation */}
       <section className="py-20 bg-gradient-to-br from-gray-50 to-green-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -395,7 +445,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer - Updated with translations */}
+      {/* Footer - keep existing implementation */}
       <footer className="bg-gradient-to-r from-green-800 to-green-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
