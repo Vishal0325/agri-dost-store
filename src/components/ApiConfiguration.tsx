@@ -18,7 +18,7 @@ const ApiConfiguration: React.FC<ApiConfigurationProps> = ({ onApiKeySubmit }) =
       onApiKeySubmit(apiKey.trim());
       toast({
         title: 'API Key Saved',
-        description: 'Your Perplexity API key has been saved in your browser.',
+        description: 'Your Gemini API key has been saved in your browser.',
       });
     } else {
       toast({
@@ -35,16 +35,16 @@ const ApiConfiguration: React.FC<ApiConfigurationProps> = ({ onApiKeySubmit }) =
         <CardHeader>
           <CardTitle>AI Chatbot Configuration</CardTitle>
           <CardDescription>
-            To enable AI-powered features, please provide your Perplexity AI API key. The key will be stored in your browser's local storage. You can get one from the{' '}
-            <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
-              Perplexity AI platform
+            To enable AI-powered features, please provide your Google Gemini API key. The key will be stored in your browser's local storage. You can get one from the{' '}
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+              Google AI Studio
             </a>.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Input
             type="password"
-            placeholder="Enter your Perplexity API Key"
+            placeholder="Enter your Gemini API Key"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}

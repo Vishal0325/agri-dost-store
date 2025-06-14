@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Send, User, Bot, Plus, MapPin, Cloud, Sun, CloudRain, Snowflake } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -55,14 +56,14 @@ const ChatbotPage = () => {
   }, [messages, isBotTyping]);
 
   useEffect(() => {
-    const savedApiKey = localStorage.getItem('perplexityApiKey');
+    const savedApiKey = localStorage.getItem('geminiApiKey');
     if (savedApiKey) {
       setApiKey(savedApiKey);
     }
   }, []);
   
   const handleApiKeySubmit = (key: string) => {
-    localStorage.setItem('perplexityApiKey', key);
+    localStorage.setItem('geminiApiKey', key);
     setApiKey(key);
   };
 
@@ -83,34 +84,42 @@ const ChatbotPage = () => {
     setIsBotTyping(true);
 
     try {
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama-3.1-sonar-small-128k-online',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an expert farming assistant for Indian farmers. Provide concise, accurate, and helpful information. If asked about weather, provide it for the specified location. Respond in the same language as the user query (e.g., Hindi or English).'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
+          contents: [{
+            "role": "user",
+            "parts": [{ "text": prompt }]
+          }],
+          systemInstruction: {
+            parts: [{
+              text: "You are an expert farming assistant for Indian farmers. Provide concise, accurate, and helpful information. If asked about weather, provide it for the specified location. Respond in the same language as the user query (e.g., Hindi or English)."
+            }]
+          }
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+        const errorData = await response.json();
+        console.error("Gemini API Error:", errorData);
+        throw new Error(`API request failed with status ${response.status}: ${errorData.error?.message || 'Unknown error'}`);
       }
       
       const data = await response.json();
-      const botMessage = data.choices[0].message.content;
-      addMessage(botMessage, 'bot');
+      const botMessage = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (botMessage) {
+        addMessage(botMessage, 'bot');
+      } else {
+        console.error("No content in Gemini response:", data);
+        const errorMessage = language === 'hi' 
+          ? 'माफ़ कीजिए, मुझे आपकी बात समझ नहीं आई। क्या आप फिर से पूछ सकते हैं?'
+          : "Sorry, I couldn't understand that. Could you please rephrase?";
+        addMessage(errorMessage, 'bot');
+      }
 
     } catch (error) {
       console.error("Error fetching AI response:", error);
@@ -120,7 +129,7 @@ const ChatbotPage = () => {
       addMessage(errorMessage, 'bot');
       toast({
         title: "AI Error",
-        description: "Could not fetch response from Perplexity AI. Check your API key and network connection.",
+        description: "Could not fetch response from Gemini AI. Check your API key and network connection.",
         variant: "destructive"
       });
     } finally {
