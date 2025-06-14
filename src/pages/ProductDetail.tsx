@@ -1,135 +1,96 @@
 
-import React, { useState } from 'react';
-import { ArrowLeft, Star, ShoppingCart, Heart, Share2, Truck, Shield, MessageCircle, Plus, Minus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Star, ShoppingCart, Heart, Share2, Truck, Shield, MessageCircle, Plus, Minus, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useNavigate } from 'react-router-dom';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useWallet } from '@/contexts/WalletContext';
+import { useCart } from '@/contexts/CartContext';
+import { getProductById, ProductDetail } from '@/services/productService';
 
 const ProductDetailPage = () => {
+  const [product, setProduct] = useState<ProductDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('500ml');
   const [activeTab, setActiveTab] = useState('description');
+  
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { balance, deductMoney } = useWallet();
+  const { balance } = useWallet();
+  const { addToCart } = useCart();
 
-  const product = {
-    id: 1,
-    name: "Premium Hybrid Tomato Seeds",
-    mrp: 550,
-    sellingPrice: 450,
-    rating: 4.5,
-    reviews: 124,
-    brand: "SeedCorp",
-    category: "Seeds",
-    sku: "SKU001",
-    availability: "In Stock",
-    discount: "18% OFF",
-    badge: "Best Seller",
-    images: [
-      "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3",
-      "https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?ixlib=rb-4.0.3",
-      "https://images.unsplash.com/photo-1574226516831-e1dff420e562?ixlib=rb-4.0.3",
-      "https://images.unsplash.com/photo-1607305387299-a3d9611cd469?ixlib=rb-4.0.3",
-      "https://images.unsplash.com/photo-1566281796817-93bc94d7dbd2?ixlib=rb-4.0.3"
-    ],
-    sizeOptions: [
-      { size: '50ml', price: 150, mrp: 180 },
-      { size: '100ml', price: 280, mrp: 320 },
-      { size: '250ml', price: 350, mrp: 400 },
-      { size: '500ml', price: 450, mrp: 550 },
-      { size: '1L', price: 850, mrp: 1000 },
-      { size: '2.5L', price: 1980, mrp: 2400 },
-      { size: '5L', price: 3750, mrp: 4500 }
-    ],
-    description: "Premium quality hybrid tomato seeds that produce high-yield, disease-resistant plants. Perfect for both greenhouse and open field cultivation. These seeds are specially treated for better germination rate and healthier plants.",
-    productUses: [
-      "Ideal for commercial tomato farming and home gardening",
-      "Suitable for greenhouse cultivation with controlled environment",
-      "Perfect for open field farming in various soil conditions",
-      "Excellent for organic farming practices",
-      "Recommended for farmers seeking high-yield varieties",
-      "Great for producing tomatoes for fresh market sales",
-      "Suitable for processing industries requiring quality tomatoes"
-    ],
-    features: [
-      "High yield variety - up to 40-50 kg per plant",
-      "Disease resistant to most common tomato diseases",
-      "Suitable for all seasons",
-      "90% germination rate guaranteed",
-      "Organic treatment for better growth"
-    ],
-    specifications: {
-      "Seed Type": "Hybrid",
-      "Germination Rate": "90%+",
-      "Planting Season": "All seasons",
-      "Harvest Time": "75-80 days",
-      "Plant Height": "4-6 feet",
-      "Fruit Weight": "80-120 grams"
-    },
-    usageInstructions: [
-      "Soak seeds in lukewarm water for 2-3 hours before sowing",
-      "Sow seeds in well-prepared seedbed with good drainage",
-      "Maintain soil temperature between 20-25°C for best germination",
-      "Water regularly but avoid waterlogging",
-      "Transplant seedlings after 25-30 days",
-      "Apply organic fertilizer every 15 days"
-    ]
-  };
+  useEffect(() => {
+    const loadProduct = async () => {
+      if (!id) {
+        setError('Product ID is missing');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const productData = await getProductById(id);
+        setProduct(productData);
+        setSelectedSize(productData.sizeOptions[3]?.size || productData.sizeOptions[0]?.size || '500ml');
+      } catch (err) {
+        console.error('Failed to load product:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load product');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProduct();
+  }, [id]);
 
   const getCurrentPrice = () => {
+    if (!product) return 0;
     const currentOption = product.sizeOptions.find(option => option.size === selectedSize);
     return currentOption ? currentOption.price : product.sellingPrice;
   };
 
   const getCurrentMRP = () => {
+    if (!product) return 0;
     const currentOption = product.sizeOptions.find(option => option.size === selectedSize);
     return currentOption ? currentOption.mrp : product.mrp;
   };
-
-  const reviews = [
-    {
-      id: 1,
-      name: "Rajesh Kumar",
-      rating: 5,
-      date: "2 weeks ago",
-      comment: "Excellent seeds! Got 90% germination rate as promised. My tomato plants are growing very well.",
-      location: "Punjab",
-      verified: true
-    },
-    {
-      id: 2,
-      name: "Priya Sharma",
-      rating: 4,
-      date: "1 month ago", 
-      comment: "Good quality seeds. Plants are healthy and disease-free. Will order again.",
-      location: "Haryana",
-      verified: true
-    },
-    {
-      id: 3,
-      name: "Mohammad Ali",
-      rating: 5,
-      date: "1 month ago",
-      comment: "Best tomato seeds I have used. High yield and excellent fruit quality.",
-      location: "UP",
-      verified: false
-    }
-  ];
 
   const handleBack = () => {
     navigate(-1);
   };
 
   const handleAddToCart = () => {
+    if (!product) return;
+    
     const currentPrice = getCurrentPrice();
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      price: currentPrice.toString(),
+      originalPrice: getCurrentMRP().toString(),
+      brand: product.brand,
+      category: product.category,
+      description: product.description,
+      features: product.features,
+      specifications: product.specifications,
+      images: product.images,
+      inStock: true,
+      badge: product.badge,
+      discount: product.discount
+    };
+    
+    addToCart(cartItem);
     console.log('Adding to cart:', product.name, 'Size:', selectedSize, 'Quantity:', quantity, 'Price:', currentPrice);
     toast({
       title: "कार्ट में जोड़ा गया!",
@@ -138,6 +99,7 @@ const ProductDetailPage = () => {
   };
 
   const handleAddToWishlist = () => {
+    if (!product) return;
     console.log('Adding to wishlist:', product.name);
     toast({
       title: "विशलिस्ट में जोड़ा गया!",
@@ -146,6 +108,7 @@ const ProductDetailPage = () => {
   };
 
   const handleShare = () => {
+    if (!product) return;
     console.log('Sharing product:', product.name);
     if (navigator.share) {
       navigator.share({
@@ -177,6 +140,110 @@ const ProductDetailPage = () => {
     });
   };
 
+  const handleRetry = () => {
+    if (id) {
+      window.location.reload();
+    }
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white border-b">
+          <div className="container mx-auto px-4 py-3">
+            <Button variant="ghost" size="sm" className="p-0" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back
+            </Button>
+          </div>
+        </div>
+        
+        <div className="container mx-auto px-4 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <Skeleton className="w-full h-96 rounded-lg mb-4" />
+              <div className="grid grid-cols-5 gap-2">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="w-full h-16 rounded-lg" />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-6 w-1/2" />
+              <Skeleton className="h-4 w-1/4" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="p-8 text-center">
+            <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              उत्पाद लोड नहीं हो सका
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {error === 'Product not found' 
+                ? 'यह उत्पाद उपलब्ध नहीं है या हटा दिया गया है।'
+                : 'उत्पाद की जानकारी लोड करने में समस्या हुई है। कृपया दोबारा कोशिश करें।'
+              }
+            </p>
+            <div className="space-y-3">
+              <Button onClick={handleRetry} className="w-full">
+                <Loader2 className="h-4 w-4 mr-2" />
+                दोबारा कोशिश करें
+              </Button>
+              <Button variant="outline" onClick={handleBack} className="w-full">
+                वापस जाएं
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const reviews = [
+    {
+      id: 1,
+      name: "Rajesh Kumar",
+      rating: 5,
+      date: "2 weeks ago",
+      comment: "Excellent product! Got great results as promised. Highly recommended.",
+      location: "Punjab",
+      verified: true
+    },
+    {
+      id: 2,
+      name: "Priya Sharma",
+      rating: 4,
+      date: "1 month ago", 
+      comment: "Good quality product. Very satisfied with the results. Will order again.",
+      location: "Haryana",
+      verified: true
+    },
+    {
+      id: 3,
+      name: "Mohammad Ali",
+      rating: 5,
+      date: "1 month ago",
+      comment: "Best product I have used. High quality and excellent results.",
+      location: "UP",
+      verified: false
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb */}
@@ -188,9 +255,7 @@ const ProductDetailPage = () => {
               Back
             </Button>
             <span className="text-gray-400">/</span>
-            <span className="text-gray-600">Seeds</span>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-600">Vegetable Seeds</span>
+            <span className="text-gray-600">{product.category}</span>
             <span className="text-gray-400">/</span>
             <span className="text-gray-900">{product.name}</span>
           </div>
@@ -206,6 +271,9 @@ const ProductDetailPage = () => {
                 src={product.images[selectedImage]} 
                 alt={product.name}
                 className="w-full h-96 object-cover rounded-lg"
+                onError={(e) => {
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3';
+                }}
               />
               <Badge className="absolute top-4 left-4 bg-orange-500">
                 {product.badge}
@@ -228,6 +296,9 @@ const ProductDetailPage = () => {
                     src={image} 
                     alt={`${product.name} ${index + 1}`}
                     className="w-full h-16 object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3';
+                    }}
                   />
                 </button>
               ))}
