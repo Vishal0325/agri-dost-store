@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { ArrowLeft, Minus, Plus, ShoppingCart, Trash2, Wallet, CreditCard } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, ShoppingCart, Trash2, Wallet, CreditCard, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +27,10 @@ const Cart = () => {
     } else {
       updateQuantity(id, newQuantity);
     }
+  };
+
+  const handleViewProduct = (productId: number) => {
+    navigate(`/product/${productId}`);
   };
 
   const handleWalletCheckout = async () => {
@@ -151,21 +154,38 @@ const Cart = () => {
                   <div className="space-y-6">
                     {cartItems.map((item) => (
                       <div key={item.id} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
-                        <img 
-                          src={item.image} 
-                          alt={item.name}
-                          className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                        />
+                        <div 
+                          className="cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => handleViewProduct(item.id)}
+                        >
+                          <img 
+                            src={item.image} 
+                            alt={item.name}
+                            className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                          />
+                        </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <h3 className="font-semibold text-lg text-gray-900 line-clamp-2">
+                              <h3 
+                                className="font-semibold text-lg text-gray-900 line-clamp-2 cursor-pointer hover:text-green-600 transition-colors"
+                                onClick={() => handleViewProduct(item.id)}
+                              >
                                 {item.name}
                               </h3>
                               <p className="text-sm text-green-600 font-medium">{item.company}</p>
                               {item.badge && (
                                 <Badge className="mt-1">{item.badge}</Badge>
                               )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="mt-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 p-0 h-auto"
+                                onClick={() => handleViewProduct(item.id)}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                विवरण देखें
+                              </Button>
                             </div>
                             <Button 
                               variant="ghost" 
