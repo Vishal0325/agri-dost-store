@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, Filter, Grid, List, Star, ShoppingCart, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useWallet } from '@/contexts/WalletContext';
-import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/contexts/CartContext';
 
 const ProductsPage = () => {
   const [viewMode, setViewMode] = useState('grid');
@@ -17,8 +16,8 @@ const ProductsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
 
-  const { balance, deductMoney } = useWallet();
-  const { toast } = useToast();
+  const { balance } = useWallet();
+  const { addToCart } = useCart();
 
   // Expanded product catalog with 32 products
   const products = [
@@ -475,24 +474,8 @@ const ProductsPage = () => {
   const categories = ['All', 'Seeds', 'Fertilizers', 'Pesticides', 'Tools'];
   const brands = ['SeedCorp', 'GreenGrow', 'TechFarm', 'BioCare', 'GrainMaster', 'WaterSave'];
 
-  const handlePurchase = (product: any) => {
-    const productPrice = product.price;
-    
-    if (balance >= productPrice) {
-      const success = deductMoney(productPrice);
-      if (success) {
-        toast({
-          title: "Purchase Successful!",
-          description: `You bought ${product.name} for ₹${productPrice}`,
-        });
-      }
-    } else {
-      toast({
-        title: "Insufficient Balance",
-        description: `You need ₹${productPrice - balance} more to buy this product`,
-        variant: "destructive",
-      });
-    }
+  const handleAddToCart = (product: any) => {
+    addToCart({ ...product, company: product.brand });
   };
 
   // Pagination logic
@@ -728,16 +711,12 @@ const ProductsPage = () => {
                     </div>
                     
                     <Button 
-                      className={`w-full py-3 font-semibold rounded-xl transition-all duration-200 ${
-                        balance >= product.price 
-                          ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white transform hover:scale-105' 
-                          : 'bg-gray-400 text-white cursor-not-allowed'
-                      }`}
-                      disabled={!product.inStock || balance < product.price}
-                      onClick={() => handlePurchase(product)}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2 rounded-full transform hover:scale-105 transition-all duration-200"
+                      disabled={!product.inStock}
+                      onClick={() => handleAddToCart(product)}
                     >
-                      <Wallet className="h-5 w-5 mr-2" />
-                      {balance >= product.price ? 'वॉलेट से खरीदें' : 'अपर्याप्त बैलेंस'}
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      कार्ट में जोड़ें
                     </Button>
                   </CardContent>
                 </Card>
