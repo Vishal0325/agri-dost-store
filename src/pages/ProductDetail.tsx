@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { ArrowLeft, Star, ShoppingCart, Heart, Share2, Truck, Shield, MessageCircle, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useWallet } from '@/contexts/WalletContext';
@@ -12,6 +14,7 @@ import { useWallet } from '@/contexts/WalletContext';
 const ProductDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState('500ml');
   const [activeTab, setActiveTab] = useState('description');
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -20,8 +23,8 @@ const ProductDetailPage = () => {
   const product = {
     id: 1,
     name: "Premium Hybrid Tomato Seeds",
-    price: "₹450",
-    originalPrice: "₹550",
+    mrp: 550,
+    sellingPrice: 450,
     rating: 4.5,
     reviews: 124,
     brand: "SeedCorp",
@@ -34,9 +37,28 @@ const ProductDetailPage = () => {
       "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3",
       "https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?ixlib=rb-4.0.3",
       "https://images.unsplash.com/photo-1574226516831-e1dff420e562?ixlib=rb-4.0.3",
-      "https://images.unsplash.com/photo-1607305387299-a3d9611cd469?ixlib=rb-4.0.3"
+      "https://images.unsplash.com/photo-1607305387299-a3d9611cd469?ixlib=rb-4.0.3",
+      "https://images.unsplash.com/photo-1566281796817-93bc94d7dbd2?ixlib=rb-4.0.3"
+    ],
+    sizeOptions: [
+      { size: '50ml', price: 150, mrp: 180 },
+      { size: '100ml', price: 280, mrp: 320 },
+      { size: '250ml', price: 350, mrp: 400 },
+      { size: '500ml', price: 450, mrp: 550 },
+      { size: '1L', price: 850, mrp: 1000 },
+      { size: '2.5L', price: 1980, mrp: 2400 },
+      { size: '5L', price: 3750, mrp: 4500 }
     ],
     description: "Premium quality hybrid tomato seeds that produce high-yield, disease-resistant plants. Perfect for both greenhouse and open field cultivation. These seeds are specially treated for better germination rate and healthier plants.",
+    productUses: [
+      "Ideal for commercial tomato farming and home gardening",
+      "Suitable for greenhouse cultivation with controlled environment",
+      "Perfect for open field farming in various soil conditions",
+      "Excellent for organic farming practices",
+      "Recommended for farmers seeking high-yield varieties",
+      "Great for producing tomatoes for fresh market sales",
+      "Suitable for processing industries requiring quality tomatoes"
+    ],
     features: [
       "High yield variety - up to 40-50 kg per plant",
       "Disease resistant to most common tomato diseases",
@@ -60,6 +82,16 @@ const ProductDetailPage = () => {
       "Transplant seedlings after 25-30 days",
       "Apply organic fertilizer every 15 days"
     ]
+  };
+
+  const getCurrentPrice = () => {
+    const currentOption = product.sizeOptions.find(option => option.size === selectedSize);
+    return currentOption ? currentOption.price : product.sellingPrice;
+  };
+
+  const getCurrentMRP = () => {
+    const currentOption = product.sizeOptions.find(option => option.size === selectedSize);
+    return currentOption ? currentOption.mrp : product.mrp;
   };
 
   const reviews = [
@@ -97,10 +129,11 @@ const ProductDetailPage = () => {
   };
 
   const handleAddToCart = () => {
-    console.log('Adding to cart:', product.name, 'Quantity:', quantity);
+    const currentPrice = getCurrentPrice();
+    console.log('Adding to cart:', product.name, 'Size:', selectedSize, 'Quantity:', quantity, 'Price:', currentPrice);
     toast({
       title: "कार्ट में जोड़ा गया!",
-      description: `${quantity} ${product.name} आपके कार्ट में जोड़ दिया गया है`,
+      description: `${quantity} ${product.name} (${selectedSize}) आपके कार्ट में जोड़ दिया गया है`,
     });
   };
 
@@ -182,7 +215,7 @@ const ProductDetailPage = () => {
               </Badge>
             </div>
             
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-5 gap-2">
               {product.images.map((image, index) => (
                 <button
                   key={index}
@@ -194,7 +227,7 @@ const ProductDetailPage = () => {
                   <img 
                     src={image} 
                     alt={`${product.name} ${index + 1}`}
-                    className="w-full h-20 object-cover"
+                    className="w-full h-16 object-cover"
                   />
                 </button>
               ))}
@@ -223,14 +256,33 @@ const ProductDetailPage = () => {
               </div>
             </div>
 
+            {/* Size Options */}
+            <div className="mb-6">
+              <h3 className="font-semibold mb-3">Size Options</h3>
+              <Select value={selectedSize} onValueChange={setSelectedSize}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select size" />
+                </SelectTrigger>
+                <SelectContent>
+                  {product.sizeOptions.map((option) => (
+                    <SelectItem key={option.size} value={option.size}>
+                      {option.size} - ₹{option.price} (MRP: ₹{option.mrp})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Pricing */}
             <div className="mb-6">
               <div className="flex items-center space-x-4 mb-2">
-                <span className="text-3xl font-bold text-green-600">{product.price}</span>
-                <span className="text-xl text-gray-500 line-through">{product.originalPrice}</span>
+                <span className="text-3xl font-bold text-green-600">₹{getCurrentPrice()}</span>
+                <span className="text-xl text-gray-500 line-through">₹{getCurrentMRP()}</span>
                 <Badge variant="destructive" className="text-sm">
-                  Save {((550-450)/550*100).toFixed(0)}%
+                  Save {Math.round(((getCurrentMRP() - getCurrentPrice()) / getCurrentMRP()) * 100)}%
                 </Badge>
               </div>
+              <p className="text-sm text-gray-600 mb-1">MRP: ₹{getCurrentMRP()} (Inclusive of all taxes)</p>
               <p className="text-green-600 font-medium">✓ {product.availability}</p>
             </div>
 
@@ -265,7 +317,7 @@ const ProductDetailPage = () => {
                 onClick={handleAddToCart}
               >
                 <ShoppingCart className="h-5 w-5 mr-2" />
-                Add to Cart - ₹{(450 * quantity).toLocaleString()}
+                Add to Cart - ₹{(getCurrentPrice() * quantity).toLocaleString()}
               </Button>
               
               <div className="grid grid-cols-2 gap-3">
@@ -329,8 +381,9 @@ const ProductDetailPage = () => {
         {/* Product Details Tabs */}
         <div className="mt-12">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-4 w-full lg:w-auto">
+            <TabsList className="grid grid-cols-5 w-full lg:w-auto">
               <TabsTrigger value="description">Description</TabsTrigger>
+              <TabsTrigger value="uses">Product Uses</TabsTrigger>
               <TabsTrigger value="specifications">Specifications</TabsTrigger>
               <TabsTrigger value="usage">Usage Guide</TabsTrigger>
               <TabsTrigger value="reviews">Reviews ({product.reviews})</TabsTrigger>
@@ -351,6 +404,24 @@ const ProductDetailPage = () => {
                       </li>
                     ))}
                   </ul>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="uses" className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-4">Product Uses & Applications</h3>
+                  <div className="space-y-3">
+                    {product.productUses.map((use, index) => (
+                      <div key={index} className="flex items-start">
+                        <span className="bg-green-100 text-green-600 rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 flex-shrink-0 mt-0.5">
+                          {index + 1}
+                        </span>
+                        <span className="text-gray-700">{use}</span>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
