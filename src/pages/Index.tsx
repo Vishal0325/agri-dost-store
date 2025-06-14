@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Sprout, SprayCan, Wrench, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -71,7 +70,6 @@ const Index = () => {
     }
   ];
 
-  // ... keep existing code (products array and handlePurchase function)
   const products = [
     {
       id: 1,
@@ -160,7 +158,12 @@ const Index = () => {
               <div className="flex items-center space-x-4">
                 <WalletDisplay variant="header" />
                 <LanguageSwitcher />
-                <Button variant="ghost" size="sm" className="text-white hover:bg-green-700">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-white hover:bg-green-700"
+                  onClick={() => navigate('/login')}
+                >
                   {t('header.login')}
                 </Button>
               </div>

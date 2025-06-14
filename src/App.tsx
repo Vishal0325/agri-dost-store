@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Index from './pages/Index';
@@ -7,6 +8,7 @@ import ProductUpload from './pages/ProductUpload';
 import Blog from './pages/Blog';
 import Cart from './pages/Cart';
 import NotFound from './pages/NotFound';
+import Login from './pages/Login';
 import { WalletProvider } from './contexts/WalletContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { Toaster } from '@/components/ui/toaster';
@@ -30,6 +32,7 @@ function App() {
               <Route path="/upload" element={<ProductUpload />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/payment" element={<Payment />} />
               <Route path="/upi-payment" element={<UpiPayment />} />
               <Route path="/purchase-history" element={<PurchaseHistory />} />
