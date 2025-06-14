@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Sprout, Wheat, Leaf, Sun, CloudRain, Snowflake, CheckCircle2 } from 'lucide-react';
+import { Sprout, Wheat, Leaf, Sun, CloudRain, Snowflake, CheckCircle2, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/contexts/CartContext';
 
 interface Crop {
   id: string;
@@ -19,9 +19,22 @@ interface Crop {
   description: string;
 }
 
+interface SuggestedProduct {
+  id: string;
+  name: string;
+  brand: string;
+  price: number;
+  originalPrice: number;
+  category: 'seeds' | 'pesticides' | 'fertilizers';
+  image: string;
+  description: string;
+  suitableFor: string[];
+}
+
 const CropRecommendations = () => {
   const [selectedCrops, setSelectedCrops] = useState<string[]>([]);
   const { toast } = useToast();
+  const { addToCart } = useCart();
 
   const biharCrops: Crop[] = [
     // Kharif Crops (June-October)
@@ -295,6 +308,122 @@ const CropRecommendations = () => {
     }
   ];
 
+  const suggestedProducts: SuggestedProduct[] = [
+    // Seeds
+    {
+      id: 'rice-seeds-1',
+      name: 'Premium Basmati Rice Seeds',
+      brand: 'Mahindra Seeds',
+      price: 1200,
+      originalPrice: 1500,
+      category: 'seeds',
+      image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-4.0.3',
+      description: 'High-yielding basmati rice seeds suitable for Bihar climate',
+      suitableFor: ['paddy', 'summer-rice']
+    },
+    {
+      id: 'wheat-seeds-1',
+      name: 'HD-2967 Wheat Seeds',
+      brand: 'IFFCO',
+      price: 800,
+      originalPrice: 1000,
+      category: 'seeds',
+      image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3',
+      description: 'Disease-resistant wheat variety for rabi season',
+      suitableFor: ['wheat']
+    },
+    {
+      id: 'maize-seeds-1',
+      name: 'Hybrid Maize Seeds NK-6240',
+      brand: 'Syngenta',
+      price: 1500,
+      originalPrice: 1800,
+      category: 'seeds',
+      image: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?ixlib=rb-4.0.3',
+      description: 'High-yielding hybrid maize seeds',
+      suitableFor: ['maize', 'summer-maize']
+    },
+    {
+      id: 'mustard-seeds-1',
+      name: 'Pusa Bold Mustard Seeds',
+      brand: 'NSC',
+      price: 600,
+      originalPrice: 750,
+      category: 'seeds',
+      image: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?ixlib=rb-4.0.3',
+      description: 'High oil content mustard variety',
+      suitableFor: ['mustard']
+    },
+    // Fertilizers
+    {
+      id: 'urea-1',
+      name: 'IFFCO Urea 50kg',
+      brand: 'IFFCO',
+      price: 850,
+      originalPrice: 950,
+      category: 'fertilizers',
+      image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3',
+      description: 'Nitrogen fertilizer for healthy crop growth',
+      suitableFor: ['paddy', 'wheat', 'maize', 'sugarcane', 'summer-rice', 'summer-maize']
+    },
+    {
+      id: 'dap-1',
+      name: 'DAP Fertilizer 50kg',
+      brand: 'IFFCO',
+      price: 1850,
+      originalPrice: 2000,
+      category: 'fertilizers',
+      image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3',
+      description: 'Diammonium phosphate for root development',
+      suitableFor: ['wheat', 'gram', 'lentil', 'pea', 'arhar', 'urad', 'moong', 'summer-moong']
+    },
+    {
+      id: 'potash-1',
+      name: 'Muriate of Potash 50kg',
+      brand: 'IPL',
+      price: 1650,
+      originalPrice: 1800,
+      category: 'fertilizers',
+      image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3',
+      description: 'Potassium fertilizer for fruit and flower development',
+      suitableFor: ['potato', 'watermelon', 'muskmelon', 'cucumber', 'bottle-gourd', 'bitter-gourd']
+    },
+    // Pesticides
+    {
+      id: 'insecticide-1',
+      name: 'Chlorpyrifos 20% EC',
+      brand: 'Bayer',
+      price: 750,
+      originalPrice: 900,
+      category: 'pesticides',
+      image: 'https://images.unsplash.com/photo-1609840114035-3c981960cd0e?ixlib=rb-4.0.3',
+      description: 'Broad-spectrum insecticide for pest control',
+      suitableFor: ['paddy', 'wheat', 'maize', 'cotton', 'sugarcane']
+    },
+    {
+      id: 'fungicide-1',
+      name: 'Mancozeb 75% WP',
+      brand: 'UPL',
+      price: 450,
+      originalPrice: 550,
+      category: 'pesticides',
+      image: 'https://images.unsplash.com/photo-1609840114035-3c981960cd0e?ixlib=rb-4.0.3',
+      description: 'Protective fungicide for disease prevention',
+      suitableFor: ['potato', 'wheat', 'mustard', 'gram', 'lentil']
+    },
+    {
+      id: 'herbicide-1',
+      name: '2,4-D Amine Salt 58% SL',
+      brand: 'Dhanuka',
+      price: 550,
+      originalPrice: 650,
+      category: 'pesticides',
+      image: 'https://images.unsplash.com/photo-1609840114035-3c981960cd0e?ixlib=rb-4.0.3',
+      description: 'Selective herbicide for weed control',
+      suitableFor: ['wheat', 'barley', 'sugarcane', 'maize']
+    }
+  ];
+
   const toggleCropSelection = (cropId: string) => {
     setSelectedCrops(prev => {
       const isSelected = prev.includes(cropId);
@@ -310,6 +439,37 @@ const CropRecommendations = () => {
       });
       
       return newSelection;
+    });
+  };
+
+  const getSuggestedProductsForCrops = () => {
+    if (selectedCrops.length < 5) return [];
+    
+    return suggestedProducts.filter(product => 
+      product.suitableFor.some(cropId => selectedCrops.includes(cropId))
+    );
+  };
+
+  const handleAddToCart = (product: SuggestedProduct) => {
+    addToCart({
+      id: parseInt(product.id.replace(/\D/g, '')),
+      name: product.name,
+      brand: product.brand,
+      price: `₹${product.price}`,
+      originalPrice: `₹${product.originalPrice}`,
+      category: product.category,
+      description: product.description,
+      features: [product.description],
+      specifications: { Brand: product.brand, Category: product.category },
+      images: [product.image],
+      inStock: true,
+      badge: 'Recommended',
+      discount: `${Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF`
+    });
+
+    toast({
+      title: "Added to Cart",
+      description: `${product.name} has been added to your cart`,
     });
   };
 
@@ -429,6 +589,8 @@ const CropRecommendations = () => {
     </div>
   );
 
+  const suggestedProductsForSelection = getSuggestedProductsForCrops();
+
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header */}
@@ -446,6 +608,7 @@ const CropRecommendations = () => {
           <div className="mt-4">
             <Badge className="bg-green-600 text-white px-4 py-2 text-base">
               {selectedCrops.length} crops selected
+              {selectedCrops.length >= 5 && " - Products suggested below!"}
             </Badge>
           </div>
         )}
@@ -507,6 +670,69 @@ const CropRecommendations = () => {
           {renderCropGrid(getCropsBySeason('zaid'))}
         </TabsContent>
       </Tabs>
+
+      {/* Suggested Products Section */}
+      {selectedCrops.length >= 5 && suggestedProductsForSelection.length > 0 && (
+        <div className="mt-12 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-8">
+          <h3 className="text-3xl font-bold text-green-800 mb-4 text-center">
+            🛍️ Recommended Products for Your Crops
+          </h3>
+          <p className="text-center text-gray-600 mb-8">
+            Based on your selected crops, here are the products we recommend for optimal growth
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {suggestedProductsForSelection.map((product) => (
+              <Card key={product.id} className="hover:shadow-xl transition-all duration-300 bg-white">
+                <CardContent className="p-0">
+                  <div className="relative">
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="w-full h-48 object-cover rounded-t-lg"
+                    />
+                    <div className="absolute top-3 left-3">
+                      <Badge className={`${
+                        product.category === 'seeds' ? 'bg-green-600' :
+                        product.category === 'fertilizers' ? 'bg-blue-600' :
+                        'bg-red-600'
+                      } text-white`}>
+                        {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
+                      </Badge>
+                    </div>
+                    <div className="absolute top-3 right-3">
+                      <Badge className="bg-orange-500 text-white">
+                        {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4">
+                    <h4 className="font-bold text-lg text-gray-900 mb-1">{product.name}</h4>
+                    <p className="text-sm text-gray-500 mb-2">{product.brand}</p>
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl font-bold text-green-600">₹{product.price}</span>
+                        <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      <ShoppingCart className="h-4 w-4 mr-2" />
+                      Add to Cart
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Selected Crops Summary */}
       {selectedCrops.length > 0 && (
