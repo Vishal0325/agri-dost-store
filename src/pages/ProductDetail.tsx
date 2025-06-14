@@ -32,7 +32,15 @@ const ProductDetailPage = () => {
   useEffect(() => {
     const loadProduct = async () => {
       if (!id) {
-        setError('Product ID is missing');
+        setError('MISSING_ID');
+        setLoading(false);
+        return;
+      }
+
+      // Validate that id is a valid number
+      const productId = parseInt(id);
+      if (isNaN(productId) || productId <= 0) {
+        setError('INVALID_ID');
         setLoading(false);
         return;
       }
@@ -45,7 +53,11 @@ const ProductDetailPage = () => {
         setSelectedSize(productData.sizeOptions[3]?.size || productData.sizeOptions[0]?.size || '500ml');
       } catch (err) {
         console.error('Failed to load product:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load product');
+        if (err instanceof Error && err.message === 'Product not found') {
+          setError('NOT_FOUND');
+        } else {
+          setError('FETCH_ERROR');
+        }
       } finally {
         setLoading(false);
       }
@@ -70,6 +82,14 @@ const ProductDetailPage = () => {
     navigate(-1);
   };
 
+  const handleBackToProducts = () => {
+    navigate('/products');
+  };
+
+  const handleBackToCart = () => {
+    navigate('/cart');
+  };
+
   const handleAddToCart = () => {
     if (!product) return;
     
@@ -77,17 +97,12 @@ const ProductDetailPage = () => {
     const cartItem = {
       id: product.id,
       name: product.name,
-      price: currentPrice.toString(),
-      originalPrice: getCurrentMRP().toString(),
-      brand: product.brand,
-      category: product.category,
-      description: product.description,
-      features: product.features,
-      specifications: product.specifications,
-      images: product.images,
-      inStock: true,
+      price: currentPrice,
+      originalPrice: getCurrentMRP(),
+      image: product.images[0],
+      company: product.brand,
       badge: product.badge,
-      discount: product.discount
+      quantity: quantity
     };
     
     addToCart(cartItem);
@@ -146,6 +161,35 @@ const ProductDetailPage = () => {
     }
   };
 
+  const getErrorMessage = (errorType: string) => {
+    switch (errorType) {
+      case 'MISSING_ID':
+        return {
+          title: 'उत्पाद की जानकारी अनुपलब्ध',
+          description: 'उत्पाद ID मिलते नहीं है। कृपया उत्पाद सूची से दोबारा चुनें।',
+          showRetry: false
+        };
+      case 'INVALID_ID':
+        return {
+          title: 'अमान्य उत्पाद ID',
+          description: 'यह एक अमान्य उत्पाद ID है। कृपया उत्पाद सूची से सही उत्पाद चुनें।',
+          showRetry: false
+        };
+      case 'NOT_FOUND':
+        return {
+          title: 'उत्पाद उपलब्ध नहीं',
+          description: 'यह उत्पाद अब उपलब्ध नहीं है या हटा दिया गया है। कृपया अन्य उत्पाद देखें।',
+          showRetry: false
+        };
+      default:
+        return {
+          title: 'उत्पाद लोड नहीं हो सका',
+          description: 'उत्पाद की जानकारी लोड करने में समस्या हुई है। कृपया दोबारा कोशिश करें।',
+          showRetry: true
+        };
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -185,27 +229,31 @@ const ProductDetailPage = () => {
 
   // Error state
   if (error || !product) {
+    const errorInfo = getErrorMessage(error || 'FETCH_ERROR');
+    
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="max-w-md w-full mx-4">
           <CardContent className="p-8 text-center">
             <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              उत्पाद लोड नहीं हो सका
+              {errorInfo.title}
             </h2>
             <p className="text-gray-600 mb-6">
-              {error === 'Product not found' 
-                ? 'यह उत्पाद उपलब्ध नहीं है या हटा दिया गया है।'
-                : 'उत्पाद की जानकारी लोड करने में समस्या हुई है। कृपया दोबारा कोशिश करें।'
-              }
+              {errorInfo.description}
             </p>
             <div className="space-y-3">
-              <Button onClick={handleRetry} className="w-full">
-                <Loader2 className="h-4 w-4 mr-2" />
-                दोबारा कोशिश करें
+              {errorInfo.showRetry && (
+                <Button onClick={handleRetry} className="w-full">
+                  <Loader2 className="h-4 w-4 mr-2" />
+                  दोबारा कोशिश करें
+                </Button>
+              )}
+              <Button variant="outline" onClick={handleBackToProducts} className="w-full">
+                सभी उत्पाद देखें
               </Button>
-              <Button variant="outline" onClick={handleBack} className="w-full">
-                वापस जाएं
+              <Button variant="ghost" onClick={handleBackToCart} className="w-full">
+                कार्ट पर वापस जाएं
               </Button>
             </div>
           </CardContent>
