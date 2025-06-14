@@ -34,6 +34,7 @@ interface ChatbotContextType {
   closeChatbot: () => void;
   updateProfile: (profile: Partial<UserProfile>) => void;
   clearChat: () => void;
+  detectLanguageAndIntent: (input: string) => { language: string; intent: string; isHinglish: boolean };
 }
 
 const ChatbotContext = createContext<ChatbotContextType | undefined>(undefined);
@@ -60,6 +61,39 @@ export const ChatbotProvider = ({ children }: { children: React.ReactNode }) => 
   });
   const [profileLoaded, setProfileLoaded] = useState(false);
 
+  // Hinglish and intent detection
+  const detectLanguageAndIntent = (input: string) => {
+    const lowerInput = input.toLowerCase();
+    
+    // Common Hinglish patterns and rural farming terms
+    const hinglishPatterns = [
+      /\b(mero|mera|tera|uska|humko|tumko|aapko)\b/,
+      /\b(dekho|batao|karo|hoga|hai|nahi|kya|kaise|kahan|kab)\b/,
+      /\b(paani|kheti|fasal|beej|khet|gaon|season|time)\b/,
+      /\b(according|session|problem|help|chahiye|lagta)\b/
+    ];
+    
+    const isHinglish = hinglishPatterns.some(pattern => pattern.test(lowerInput));
+    
+    // Intent detection for farming queries
+    let intent = 'general';
+    if (lowerInput.match(/(weather|mausam|paani|rain|barish)/)) {
+      intent = 'weather';
+    } else if (lowerInput.match(/(crop|fasal|ugana|grow|dekho|advice|salah)/)) {
+      intent = 'crop';
+    } else if (lowerInput.match(/(seed|beej|fertilizer|khad|buy|kharidna)/)) {
+      intent = 'product';
+    } else if (lowerInput.match(/(price|rate|market|mandi|sell|bechna)/)) {
+      intent = 'market';
+    } else if (lowerInput.match(/(disease|bimari|problem|samasya|pest|kida)/)) {
+      intent = 'problem';
+    }
+    
+    const detectedLanguage = isHinglish ? 'hinglish' : (language === 'hi' ? 'hindi' : 'english');
+    
+    return { language: detectedLanguage, intent, isHinglish };
+  };
+
   // Load profile from localStorage
   useEffect(() => {
     const savedProfile = localStorage.getItem('userProfile');
@@ -79,8 +113,8 @@ export const ChatbotProvider = ({ children }: { children: React.ReactNode }) => 
     if (profileLoaded && messages.length === 0) {
       const name = userProfile.name || (language === 'hi' ? 'किसान भाई' : 'Farmer');
       const welcomeMessage = language === 'hi'
-        ? `नमस्ते ${name} जी! मैं आपकी क्या सहायता कर सकता हूँ? आप मौसम, फसल सलाह, या उत्पादों के बारे में पूछ सकते हैं।`
-        : `Namaste ${name}! How can I help you today? You can ask about weather, crop advice, or products.`;
+        ? `नमस्ते ${name} जी! मैं आपकी क्या सहायता कर सकता हूँ? आप मौसम, फसल सलाह, या उत्पादों के बारे में पूछ सकते हैं। आप हिंग्लिश में भी बात कर सकते हैं।`
+        : `Namaste ${name}! How can I help you today? You can ask about weather, crop advice, or products. Aap Hinglish mein bhi baat kar sakte hain.`;
       
       addMessage(welcomeMessage, 'bot');
     }
@@ -108,8 +142,8 @@ export const ChatbotProvider = ({ children }: { children: React.ReactNode }) => 
     setMessages([]);
     const name = userProfile.name || (language === 'hi' ? 'किसान भाई' : 'Farmer');
     const welcomeMessage = language === 'hi'
-      ? `नमस्ते ${name} जी! मैं आपकी क्या सहायता कर सकता हूँ? आप मौसम, फसल सलाह, या उत्पादों के बारे में पूछ सकते हैं।`
-      : `Namaste ${name}! How can I help you today? You can ask about weather, crop advice, or products.`;
+      ? `नमस्ते ${name} जी! मैं आपकी क्या सहायता कर सकता हूँ? आप मौसम, फसल सलाह, या उत्पादों के बारे में पूछ सकते हैं। आप हिंग्लिश में भी बात कर सकते हैं।`
+      : `Namaste ${name}! How can I help you today? You can ask about weather, crop advice, or products. Aap Hinglish mein bhi baat kar sakte hain.`;
     addMessage(welcomeMessage, 'bot');
   };
 
@@ -270,7 +304,8 @@ export const ChatbotProvider = ({ children }: { children: React.ReactNode }) => 
       openChatbot,
       closeChatbot,
       updateProfile,
-      clearChat
+      clearChat,
+      detectLanguageAndIntent
     }}>
       {children}
     </ChatbotContext.Provider>

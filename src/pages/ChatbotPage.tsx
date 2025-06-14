@@ -36,7 +36,8 @@ const ChatbotPage = () => {
     userProfile, 
     addMessage, 
     updateProfile,
-    clearChat 
+    clearChat,
+    detectLanguageAndIntent
   } = useChatbot();
   const { language } = useLanguage();
   const { addToCart } = useCart();
@@ -67,15 +68,45 @@ const ChatbotPage = () => {
     setApiKey(key);
   };
 
-  const handleSendMessage = () => {
-    if (!inputMessage.trim() || isBotTyping) return;
+  const createHinglishAwarePrompt = (userMessage: string, detectedInfo: any) => {
+    const { language: detectedLang, intent, isHinglish } = detectedInfo;
+    
+    let systemPrompt = `You are an expert farming assistant for Indian farmers. You understand Hinglish (Hindi-English mix) very well. 
 
-    addMessage(inputMessage, 'user');
-    handleBotResponse(inputMessage);
-    setInputMessage('');
+Key Hinglish patterns to understand:
+- "mero/mera/tera" = my/your
+- "dekho" = see/look
+- "batao" = tell me
+- "karo" = do
+- "chahiye" = need/want
+- "lagta hai" = seems like
+- "according" = के अनुसार
+- "session/season" = मौसम/time
+- Rural farming terms in Roman Hindi
+
+User's farming context:
+- Village: ${userProfile.village || 'Bihar'}
+- Farm size: ${userProfile.farmSize || '2 acres'}
+- Crops: ${userProfile.primaryCrops.join(', ') || 'Mixed farming'}
+
+User input language detected: ${detectedLang}
+Intent detected: ${intent}
+
+If user writes in Hinglish, respond in a natural mix of Hindi and English that farmers commonly use.
+Be practical, concise, and helpful. Focus on actionable farming advice.`;
+
+    if (intent === 'weather') {
+      systemPrompt += `\n\nThis is a weather query. Provide current weather and farming-specific forecasts for ${userProfile.village || 'Bihar'}.`;
+    } else if (intent === 'crop') {
+      systemPrompt += `\n\nThis is about crops/farming. Give specific advice for their farming context.`;
+    } else if (intent === 'product') {
+      systemPrompt += `\n\nThis is about seeds/fertilizers/products. Suggest specific products if needed.`;
+    }
+
+    return systemPrompt + `\n\nUser message: "${userMessage}"`;
   };
 
-  const getAIResponse = async (prompt: string) => {
+  const getAIResponse = async (prompt: string, userMessage?: string) => {
     if (!apiKey) {
       addMessage("I can't answer right now. Please configure the AI API key.", 'bot');
       return;
@@ -84,6 +115,10 @@ const ChatbotPage = () => {
     setIsBotTyping(true);
 
     try {
+      // Detect language and intent for better responses
+      const detectedInfo = userMessage ? detectLanguageAndIntent(userMessage) : { language: 'english', intent: 'general', isHinglish: false };
+      const enhancedPrompt = userMessage ? createHinglishAwarePrompt(userMessage, detectedInfo) : prompt;
+
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
@@ -92,11 +127,11 @@ const ChatbotPage = () => {
         body: JSON.stringify({
           contents: [{
             "role": "user",
-            "parts": [{ "text": prompt }]
+            "parts": [{ "text": enhancedPrompt }]
           }],
           systemInstruction: {
             parts: [{
-              text: "You are an expert farming assistant for Indian farmers. Provide concise, accurate, and helpful information. If asked about weather, provide it for the specified location. Respond in the same language as the user query (e.g., Hindi or English)."
+              text: "You are an expert farming assistant for Indian farmers. You understand Hinglish (mix of Hindi and English) very well. Respond naturally in the same style as the user's input. Be practical and helpful."
             }]
           }
         }),
@@ -138,17 +173,15 @@ const ChatbotPage = () => {
   }
 
   const handleBotResponse = (userMessage: string) => {
+    const detectedInfo = detectLanguageAndIntent(userMessage);
     const lowerMessage = userMessage.toLowerCase();
     
-    if (lowerMessage.includes('weather') || lowerMessage.includes('मौसम')) {
-      const location = userProfile.village || 'Bihar, India';
-      const prompt = language === 'hi'
-        ? `${location} में खेती के लिए मौसम की जानकारी और पूर्वानुमान दें।`
-        : `Provide the current weather and forecast for ${location} for farming purposes.`;
-      getAIResponse(prompt);
-    }
-    else if (lowerMessage.includes('seed') || lowerMessage.includes('बीज') || 
-             lowerMessage.includes('fertilizer') || lowerMessage.includes('खाद')) {
+    // Handle specific intents with product suggestions
+    if (detectedInfo.intent === 'product' || 
+        lowerMessage.includes('seed') || lowerMessage.includes('बीज') || 
+        lowerMessage.includes('fertilizer') || lowerMessage.includes('खाद') ||
+        lowerMessage.includes('beej') || lowerMessage.includes('khad')) {
+      
       const suggestions: ProductSuggestion[] = [
         {
           id: 1,
@@ -178,26 +211,26 @@ const ChatbotPage = () => {
       
       setProductSuggestions(suggestions);
       
-      const message = language === 'hi'
-        ? 'आपके लिए कुछ उत्पाद सुझाव:\n\n👇 नीचे दिए गए उत्पादों को देखें और पसंद आने पर कार्ट में जोड़ें।'
-        : 'Here are some product suggestions for you:\n\n👇 Check the products below and add to cart if you like them.';
-      
-      setTimeout(() => addMessage(message, 'bot'), 500);
-    }
-    else if (lowerMessage.includes('recommend') || lowerMessage.includes('सुझाव')) {
-      const crops = userProfile.primaryCrops.length > 0 
-        ? userProfile.primaryCrops.join(', ')
-        : (language === 'hi' ? 'धान, गेहूं' : 'Paddy, Wheat');
-      
-      const message = language === 'hi'
-        ? `${userProfile.name || 'किसान भाई'} जी, आपकी ${userProfile.farmSize || '2'} एकड़ जमीन और (${crops}) फसलों के लिए सुझाव यहाँ दिए गए हैं। आप बीज या खाद के बारे में पूछ सकते हैं।`
-        : `${userProfile.name || 'Dear Farmer'}, here are suggestions for your ${userProfile.farmSize || '2'} acre land and (${crops}) crops. You can ask about seeds or fertilizers.`;
+      const message = detectedInfo.isHinglish 
+        ? 'Aapke liye kuch product suggestions hain:\n\n👇 Neeche diye gaye products dekho aur pasand aane par cart mein add karo.'
+        : (language === 'hi'
+          ? 'आपके लिए कुछ उत्पाद सुझाव:\n\n👇 नीचे दिए गए उत्पादों को देखें और पसंद आने पर कार्ट में जोड़ें।'
+          : 'Here are some product suggestions for you:\n\n👇 Check the products below and add to cart if you like them.');
       
       setTimeout(() => addMessage(message, 'bot'), 500);
     }
     else {
-      getAIResponse(userMessage);
+      // Use enhanced AI response with Hinglish support
+      getAIResponse(userMessage, userMessage);
     }
+  };
+
+  const handleSendMessage = () => {
+    if (!inputMessage.trim() || isBotTyping) return;
+
+    addMessage(inputMessage, 'user');
+    handleBotResponse(inputMessage);
+    setInputMessage('');
   };
 
   const handleAddToCart = (product: ProductSuggestion) => {
@@ -325,7 +358,7 @@ const ChatbotPage = () => {
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder={language === 'hi' ? 'खेती के बारे में पूछें...' : 'Ask about farming...'}
+                    placeholder={language === 'hi' ? 'खेती के बारे में पूछें... या Hinglish mein baat kariye' : 'Ask about farming... ya Hinglish mein bhi puch sakte hain'}
                     className="flex-1"
                     disabled={isBotTyping}
                   />
