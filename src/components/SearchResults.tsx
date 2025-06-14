@@ -1,11 +1,11 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Star, Wallet } from 'lucide-react';
+import { Star, Wallet, ShoppingCart } from 'lucide-react';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/contexts/CartContext';
 
 interface Product {
   id: number;
@@ -29,28 +29,12 @@ interface SearchResultsProps {
 }
 
 const SearchResults = ({ query, products, onClose }: SearchResultsProps) => {
-  const { balance, deductMoney } = useWallet();
+  const { balance } = useWallet();
   const { toast } = useToast();
+  const { addToCart } = useCart();
 
-  const handlePurchase = (product: Product) => {
-    const productPrice = product.price;
-    
-    if (balance >= productPrice) {
-      const success = deductMoney(productPrice);
-      if (success) {
-        toast({
-          title: "Purchase Successful!",
-          description: `You bought ${product.name} for ₹${productPrice}`,
-        });
-        onClose();
-      }
-    } else {
-      toast({
-        title: "Insufficient Balance",
-        description: `You need ₹${productPrice - balance} more to buy this product`,
-        variant: "destructive",
-      });
-    }
+  const handleAddToCart = (product: Product) => {
+    addToCart(product);
   };
 
   if (!query) return null;
@@ -119,16 +103,12 @@ const SearchResults = ({ query, products, onClose }: SearchResultsProps) => {
                         
                         <Button 
                           size="sm"
-                          className={`w-full text-xs ${
-                            balance >= product.price 
-                              ? 'bg-green-600 hover:bg-green-700 text-white' 
-                              : 'bg-gray-400 text-white cursor-not-allowed'
-                          }`}
-                          disabled={balance < product.price}
-                          onClick={() => handlePurchase(product)}
+                          className='w-full text-xs bg-green-600 hover:bg-green-700 text-white'
+                          disabled={!product.inStock}
+                          onClick={() => handleAddToCart(product)}
                         >
-                          <Wallet className="h-3 w-3 mr-1" />
-                          {balance >= product.price ? `Buy ₹${product.price}` : 'Insufficient Balance'}
+                          <ShoppingCart className="h-3 w-3 mr-1" />
+                          Add to Cart
                         </Button>
                       </div>
                     </div>

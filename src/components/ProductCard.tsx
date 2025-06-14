@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Eye, Trash2, User, Wallet, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Product } from '@/types/product';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '@/contexts/CartContext';
 
 interface ProductCardProps {
   product: Product;
@@ -14,7 +14,8 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product, onDelete }: ProductCardProps) => {
-  const { balance, deductMoney } = useWallet();
+  const { balance } = useWallet();
+  const { addToCart } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -33,32 +34,7 @@ const ProductCard = ({ product, onDelete }: ProductCardProps) => {
 
   const handleAddToCart = () => {
     console.log('Adding to cart:', product.id);
-    toast({
-      title: "कार्ट में जोड़ा गया!",
-      description: `${product.name} आपके कार्ट में जोड़ दिया गया है`,
-    });
-  };
-
-  const handleWalletPurchase = () => {
-    console.log('Wallet purchase for product:', product.id);
-    
-    const productPrice = parseFloat(product.price);
-    
-    if (balance >= productPrice) {
-      const success = deductMoney(productPrice);
-      if (success) {
-        toast({
-          title: "खरीदारी सफल!",
-          description: `आपने ${product.name} ₹${productPrice} में खरीदा`,
-        });
-      }
-    } else {
-      toast({
-        title: "अपर्याप्त बैलेंस",
-        description: `इस उत्पाद को खरीदने के लिए ₹${productPrice - balance} और चाहिए`,
-        variant: "destructive",
-      });
-    }
+    addToCart(product);
   };
 
   const handleDelete = () => {
@@ -128,19 +104,6 @@ const ProductCard = ({ product, onDelete }: ProductCardProps) => {
           >
             <User className="h-3 w-3 mr-1" />
             किसान विवरण
-          </Button>
-          <Button 
-            size="sm" 
-            className={`flex-1 text-xs ${
-              balance >= productPrice 
-                ? 'bg-orange-500 hover:bg-orange-600 text-white' 
-                : 'bg-gray-400 text-white cursor-not-allowed'
-            }`}
-            onClick={handleWalletPurchase}
-            disabled={!product.inStock}
-          >
-            <Wallet className="h-3 w-3 mr-1" />
-            {balance >= productPrice ? 'वॉलेट से खरीदें' : 'अपर्याप्त बैलेंस'}
           </Button>
         </div>
         

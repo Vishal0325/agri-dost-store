@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ShoppingCart, Star, ArrowRight, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,7 @@ import { allProducts } from '@/lib/products';
 const Index = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { balance, deductMoney } = useWallet();
+  const { balance } = useWallet();
   const { addToCart } = useCart();
   const { toast } = useToast();
   
@@ -28,26 +27,6 @@ const Index = () => {
   const productsPerPage = 30;
   const totalPages = 10;
   const displayedProducts = allProducts.slice(0, currentPage * productsPerPage);
-
-  const handlePurchase = (product: any) => {
-    const productPrice = product.price;
-    
-    if (balance >= productPrice) {
-      const success = deductMoney(productPrice);
-      if (success) {
-        toast({
-          title: "Purchase Successful!",
-          description: `You bought ${product.name} for ₹${productPrice}`,
-        });
-      }
-    } else {
-      toast({
-        title: "Insufficient Balance",
-        description: `You need ₹${productPrice - balance} more to buy this product`,
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleAddToCart = (product: any) => {
     addToCart(product);
@@ -157,22 +136,6 @@ const Index = () => {
                       >
                         <ShoppingCart className="h-4 w-4 mr-2" />
                         कार्ट में जोड़ें
-                      </Button>
-                      
-                      <Button 
-                        className={`w-full font-semibold py-2 rounded-full transform hover:scale-105 transition-all duration-200 ${
-                          balance >= product.price 
-                            ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white' 
-                            : 'bg-gray-400 text-white cursor-not-allowed'
-                        }`}
-                        disabled={balance < product.price}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePurchase(product);
-                        }}
-                      >
-                        <Wallet className="h-4 w-4 mr-2" />
-                        {balance >= product.price ? `वॉलेट से खरीदें ₹${product.price}` : 'अपर्याप्त बैलेंस'}
                       </Button>
                     </div>
                   </div>
