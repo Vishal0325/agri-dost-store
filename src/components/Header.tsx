@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, Crown, Sprout, SprayCan, Wrench, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import VoiceSearch from '@/components/VoiceSearch';
 import UserMenu from './UserMenu';
 import { allProducts } from '@/lib/products';
+import HomeVoiceSearch from './HomeVoiceSearch';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -25,6 +25,12 @@ const Header = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [showSearchResults, setShowSearchResults] = useState(false);
     const [searchResults, setSearchResults] = useState<any[]>([]);
+
+    // --- Add searchResultTrigger to enable voice trigger functionality ---
+    const handleHomeVoiceSearch = (voiceQuery: string) => {
+        setSearchQuery(voiceQuery);
+        performSearch(voiceQuery);
+    };
 
     const categories = [
         { id: 1, name: t('categories.seeds'), icon: Sprout },
@@ -157,7 +163,12 @@ const Header = () => {
                                 className="w-full pl-10 pr-20 py-3 rounded-full border-0 shadow-lg focus:ring-2 focus:ring-yellow-400 text-gray-900 placeholder:text-gray-500"
                             />
                             <div className="absolute right-12 top-1/2 transform -translate-y-1/2 z-10">
-                                <VoiceSearch onSearchResults={handleVoiceSearch} />
+                                {/* Replace with new HomeVoiceSearch mic button */}
+                                <HomeVoiceSearch
+                                    setSearchQuery={setSearchQuery}
+                                    onVoiceSearchResult={handleHomeVoiceSearch}
+                                    disabled={false}
+                                />
                             </div>
                             <Button
                                 className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 z-10"
