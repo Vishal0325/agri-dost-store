@@ -81,12 +81,16 @@ const HomeVoiceSearch: React.FC<HomeVoiceSearchProps> = ({ setSearchQuery, onVoi
       type="button"
       variant="ghost"
       size="sm"
-      className={`p-2 rounded-full transition-all duration-200 ${isListening ? 'bg-red-500 text-white' : 'bg-white text-gray-600 hover:bg-gray-100'} ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+      className={`p-2 rounded-full transition-all duration-200 bg-red-500 text-white border-2 border-red-500 shadow-lg ${
+        disabled ? 'opacity-60 cursor-not-allowed' : ''
+      }`}
       onClick={isListening ? stopListening : startListening}
       title={isListening ? "Stop voice search" : "Start voice search"}
       disabled={disabled}
+      style={{ minWidth: '40px', minHeight: '40px' }}
+      aria-label="Voice input (Hinglish supported)"
     >
-      {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+      {isListening ? <MicOff className="h-5 w-5 text-white" /> : <Mic className="h-5 w-5 text-white" />}
     </Button>
   );
 };
