@@ -26,6 +26,10 @@ const Index = () => {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
+  // Add pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   // ... keep existing code (categories array)
   const categories = [
     {
@@ -78,18 +82,20 @@ const Index = () => {
     }
   ];
 
-  // ... keep existing code (products array)
-  const products = [
+  // Expanded product catalog with 300 products across 10 pages (30 per page)
+  const allProducts = [
+    // Page 1 Products (1-30)
     {
       id: 1,
-      name: "Hybrid Tomato Seeds",
+      name: "Hybrid Tomato Seeds Premium",
       price: 450,
       originalPrice: 550,
       image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3",
       rating: 4.8,
       reviews: 234,
       badge: "Premium",
-      discount: 18
+      discount: 18,
+      company: "SeedCorp"
     },
     {
       id: 2,
@@ -100,7 +106,8 @@ const Index = () => {
       rating: 4.9,
       reviews: 187,
       badge: "Bestseller",
-      discount: 20
+      discount: 20,
+      company: "GreenGrow"
     },
     {
       id: 3,
@@ -111,7 +118,8 @@ const Index = () => {
       rating: 4.7,
       reviews: 156,
       badge: "Eco-friendly",
-      discount: 16
+      discount: 16,
+      company: "BioCare"
     },
     {
       id: 4,
@@ -122,9 +130,327 @@ const Index = () => {
       rating: 4.6,
       reviews: 89,
       badge: "New",
-      discount: 17
+      discount: 17,
+      company: "TechFarm"
+    },
+    {
+      id: 5,
+      name: "Wheat Seeds High Yield",
+      price: 380,
+      originalPrice: 450,
+      image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3",
+      rating: 4.5,
+      reviews: 145,
+      badge: "High Yield",
+      discount: 16,
+      company: "GrainMaster"
+    },
+    {
+      id: 6,
+      name: "Potash Fertilizer Granules",
+      price: 950,
+      originalPrice: 1100,
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
+      rating: 4.4,
+      reviews: 98,
+      badge: "Essential",
+      discount: 14,
+      company: "NutriGrow"
+    },
+    {
+      id: 7,
+      name: "Fungicide Concentrate",
+      price: 720,
+      originalPrice: 900,
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
+      rating: 4.3,
+      reviews: 76,
+      badge: "Fast Acting",
+      discount: 20,
+      company: "FungiStop"
+    },
+    {
+      id: 8,
+      name: "Drip Irrigation System",
+      price: 5999,
+      originalPrice: 7500,
+      image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3",
+      rating: 4.7,
+      reviews: 67,
+      badge: "Water Saver",
+      discount: 20,
+      company: "WaterSave"
+    },
+    {
+      id: 9,
+      name: "Rice Paddy Seeds Premium",
+      price: 320,
+      originalPrice: 400,
+      image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3",
+      rating: 4.6,
+      reviews: 203,
+      badge: "Premium",
+      discount: 20,
+      company: "RiceGrow"
+    },
+    {
+      id: 10,
+      name: "Micro Nutrient Mix",
+      price: 1100,
+      originalPrice: 1300,
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
+      rating: 4.8,
+      reviews: 134,
+      badge: "Complete",
+      discount: 15,
+      company: "MicroGrow"
+    },
+    {
+      id: 11,
+      name: "Herbicide Solution",
+      price: 680,
+      originalPrice: 850,
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
+      rating: 4.2,
+      reviews: 89,
+      badge: "Professional",
+      discount: 20,
+      company: "WeedKill"
+    },
+    {
+      id: 12,
+      name: "Garden Pruning Tools",
+      price: 1200,
+      originalPrice: 1500,
+      image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3",
+      rating: 4.5,
+      reviews: 112,
+      badge: "Durable",
+      discount: 20,
+      company: "CutMaster"
+    },
+    {
+      id: 13,
+      name: "Corn Hybrid Seeds",
+      price: 420,
+      originalPrice: 500,
+      image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3",
+      rating: 4.6,
+      reviews: 167,
+      badge: "High Protein",
+      discount: 16,
+      company: "CornKing"
+    },
+    {
+      id: 14,
+      name: "Phosphorus Fertilizer",
+      price: 780,
+      originalPrice: 950,
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
+      rating: 4.4,
+      reviews: 125,
+      badge: "Root Enhancer",
+      discount: 18,
+      company: "PhosphoGrow"
+    },
+    {
+      id: 15,
+      name: "Insecticide Powder",
+      price: 550,
+      originalPrice: 700,
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
+      rating: 4.3,
+      reviews: 89,
+      badge: "Long Lasting",
+      discount: 21,
+      company: "BugAway"
+    },
+    {
+      id: 16,
+      name: "Soil pH Meter Digital",
+      price: 899,
+      originalPrice: 1200,
+      image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3",
+      rating: 4.7,
+      reviews: 95,
+      badge: "Digital",
+      discount: 25,
+      company: "SoilTest"
+    },
+    {
+      id: 17,
+      name: "Sunflower Seeds Oil Rich",
+      price: 380,
+      originalPrice: 450,
+      image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3",
+      rating: 4.7,
+      reviews: 189,
+      badge: "Oil Rich",
+      discount: 16,
+      company: "SunBright"
+    },
+    {
+      id: 18,
+      name: "Calcium Nitrate Granules",
+      price: 950,
+      originalPrice: 1150,
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
+      rating: 4.6,
+      reviews: 108,
+      badge: "Quick Dissolving",
+      discount: 17,
+      company: "CalciumPlus"
+    },
+    {
+      id: 19,
+      name: "Nematicide Treatment",
+      price: 890,
+      originalPrice: 1100,
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
+      rating: 4.2,
+      reviews: 73,
+      badge: "Soil Treatment",
+      discount: 19,
+      company: "NemaStop"
+    },
+    {
+      id: 20,
+      name: "Garden Hose Heavy Duty",
+      price: 1800,
+      originalPrice: 2200,
+      image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3",
+      rating: 4.4,
+      reviews: 143,
+      badge: "Heavy Duty",
+      discount: 18,
+      company: "FlowMax"
+    },
+    {
+      id: 21,
+      name: "Pepper Seeds Variety Pack",
+      price: 320,
+      originalPrice: 400,
+      image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3",
+      rating: 4.5,
+      reviews: 156,
+      badge: "Variety Pack",
+      discount: 20,
+      company: "SpiceGrow"
+    },
+    {
+      id: 22,
+      name: "Urea Fertilizer High N",
+      price: 650,
+      originalPrice: 800,
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
+      rating: 4.4,
+      reviews: 167,
+      badge: "High Nitrogen",
+      discount: 19,
+      company: "NitroMax"
+    },
+    {
+      id: 23,
+      name: "Rodenticide Safe Bait",
+      price: 450,
+      originalPrice: 550,
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
+      rating: 4.1,
+      reviews: 87,
+      badge: "Safe Formula",
+      discount: 18,
+      company: "RatAway"
+    },
+    {
+      id: 24,
+      name: "Sprinkler System Auto",
+      price: 3500,
+      originalPrice: 4500,
+      image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3",
+      rating: 4.5,
+      reviews: 92,
+      badge: "Auto Timer",
+      discount: 22,
+      company: "RainMaster"
+    },
+    {
+      id: 25,
+      name: "Carrot Seeds Sweet Variety",
+      price: 250,
+      originalPrice: 300,
+      image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3",
+      rating: 4.6,
+      reviews: 178,
+      badge: "Sweet Variety",
+      discount: 17,
+      company: "RootVeg"
+    },
+    {
+      id: 26,
+      name: "Iron Chelate Supplement",
+      price: 820,
+      originalPrice: 1000,
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
+      rating: 4.3,
+      reviews: 94,
+      badge: "Iron Rich",
+      discount: 18,
+      company: "IronGrow"
+    },
+    {
+      id: 27,
+      name: "Aphid Control Spray",
+      price: 620,
+      originalPrice: 750,
+      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
+      rating: 4.4,
+      reviews: 156,
+      badge: "Targeted",
+      discount: 17,
+      company: "AphidAway"
+    },
+    {
+      id: 28,
+      name: "Garden Tiller Electric",
+      price: 12999,
+      originalPrice: 16000,
+      image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3",
+      rating: 4.6,
+      reviews: 56,
+      badge: "Electric",
+      discount: 19,
+      company: "TillMaster"
+    },
+    {
+      id: 29,
+      name: "Cucumber Seeds Disease Resistant",
+      price: 290,
+      originalPrice: 360,
+      image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?ixlib=rb-4.0.3",
+      rating: 4.5,
+      reviews: 134,
+      badge: "Disease Resistant",
+      discount: 19,
+      company: "CucumberPro"
+    },
+    {
+      id: 30,
+      name: "Magnesium Sulfate Pure",
+      price: 540,
+      originalPrice: 650,
+      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
+      rating: 4.2,
+      reviews: 87,
+      badge: "Pure Grade",
+      discount: 17,
+      company: "MagniGrow"
     }
   ];
+
+  // Get products for current page (30 products per page)
+  const productsPerPage = 30;
+  const totalPages = 10; // Up to 10 pages as requested
+  const displayedProducts = allProducts.slice(0, currentPage * productsPerPage);
 
   // Enhanced search function for both text and voice
   const performSearch = (query: string) => {
@@ -136,9 +462,10 @@ const Index = () => {
 
     console.log('Performing search for:', query);
 
-    const filteredProducts = products.filter(product => 
+    const filteredProducts = displayedProducts.filter(product => 
       product.name.toLowerCase().includes(query.toLowerCase()) ||
       product.badge.toLowerCase().includes(query.toLowerCase()) ||
+      product.company.toLowerCase().includes(query.toLowerCase()) ||
       (query.toLowerCase().includes('seed') && product.name.toLowerCase().includes('seed')) ||
       (query.toLowerCase().includes('fertilizer') && product.name.toLowerCase().includes('fertilizer')) ||
       (query.toLowerCase().includes('pesticide') && product.name.toLowerCase().includes('pesticide')) ||
@@ -217,6 +544,24 @@ const Index = () => {
         description: `You need ₹${productPrice - balance} more to buy this product`,
         variant: "destructive",
       });
+    }
+  };
+
+  // Handle "See More Products" button click
+  const handleSeeMoreProducts = () => {
+    if (currentPage < totalPages) {
+      setIsLoadingMore(true);
+      
+      // Simulate loading delay
+      setTimeout(() => {
+        setCurrentPage(currentPage + 1);
+        setIsLoadingMore(false);
+        
+        toast({
+          title: "More Products Loaded!",
+          description: `Showing page ${currentPage + 1} of ${totalPages}`,
+        });
+      }, 1000);
     }
   };
 
@@ -319,6 +664,7 @@ const Index = () => {
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                   <h4 className="font-medium text-gray-900 text-sm line-clamp-1">{product.name}</h4>
+                                  <p className="text-xs text-gray-500">{product.company}</p>
                                   <div className="flex items-center mt-1">
                                     <div className="flex text-yellow-400 mr-2">
                                       {[...Array(5)].map((_, i) => (
@@ -427,15 +773,25 @@ const Index = () => {
       {/* Brands Section */}
       <BrandsSection />
 
-      {/* Featured Products - keep existing implementation */}
+      {/* Featured Products - Enhanced with Pagination */}
       <section className="py-20 bg-gradient-to-br from-gray-50 to-green-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h3 className="text-4xl font-bold text-gray-900 mb-6">{t('products.title')}</h3>
-            <p className="text-xl text-gray-600">अधिकतम उत्पादन और गुणवत्ता के लिए हस्तचयनित उत्पाद</p>
+            <p className="text-xl text-gray-600 mb-4">अधिकतम उत्पादन और गुणवत्ता के लिए हस्तचयनित उत्पाद</p>
+            <div className="flex justify-center items-center space-x-4 text-lg">
+              <Badge className="bg-green-600 text-white px-4 py-2">
+                दिखाए जा रहे: {displayedProducts.length} उत्पाद
+              </Badge>
+              <Badge className="bg-blue-600 text-white px-4 py-2">
+                पेज {currentPage} का {totalPages}
+              </Badge>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {products.map((product) => (
+          
+          {/* Products Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {displayedProducts.map((product) => (
               <Card 
                 key={product.id} 
                 className="group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border-0 bg-white overflow-hidden"
@@ -446,7 +802,7 @@ const Index = () => {
                     <img 
                       src={product.image} 
                       alt={product.name}
-                      className="w-full h-64 object-cover"
+                      className="w-full h-48 object-cover"
                     />
                     <Badge className="absolute top-3 left-3 bg-red-500 text-white font-semibold">
                       -{product.discount}%
@@ -467,28 +823,29 @@ const Index = () => {
                       </Button>
                     </div>
                   </div>
-                  <div className="p-6">
-                    <h4 className="font-bold text-xl mb-3 group-hover:text-green-600 transition-colors">
+                  <div className="p-4">
+                    <p className="text-xs text-green-600 font-medium mb-1">{product.company}</p>
+                    <h4 className="font-bold text-lg mb-2 group-hover:text-green-600 transition-colors line-clamp-2">
                       {product.name}
                     </h4>
-                    <div className="flex items-center mb-4">
+                    <div className="flex items-center mb-3">
                       <div className="flex text-yellow-400 mr-2">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`h-4 w-4 ${i < Math.floor(product.rating) ? 'fill-current' : ''}`} />
+                          <Star key={i} className={`h-3 w-3 ${i < Math.floor(product.rating) ? 'fill-current' : ''}`} />
                         ))}
                       </div>
-                      <span className="text-sm text-gray-600">({product.reviews})</span>
+                      <span className="text-xs text-gray-600">({product.reviews})</span>
                     </div>
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center justify-between mb-4">
                       <div className="space-y-1">
                         <div className="flex items-center space-x-2">
-                          <span className="text-3xl font-bold text-green-600">₹{product.price.toLocaleString()}</span>
-                          <span className="text-lg text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
+                          <span className="text-xl font-bold text-green-600">₹{product.price.toLocaleString()}</span>
+                          <span className="text-sm text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
                     <Button 
-                      className={`w-full font-semibold py-3 rounded-full transform hover:scale-105 transition-all duration-200 ${
+                      className={`w-full font-semibold py-2 rounded-full transform hover:scale-105 transition-all duration-200 ${
                         balance >= product.price 
                           ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white' 
                           : 'bg-gray-400 text-white cursor-not-allowed'
@@ -499,7 +856,7 @@ const Index = () => {
                         handlePurchase(product);
                       }}
                     >
-                      <Wallet className="h-5 w-5 mr-2" />
+                      <Wallet className="h-4 w-4 mr-2" />
                       {balance >= product.price ? `वॉलेट से खरीदें ₹${product.price}` : 'अपर्याप्त बैलेंस'}
                     </Button>
                   </div>
@@ -507,15 +864,48 @@ const Index = () => {
               </Card>
             ))}
           </div>
-          <div className="text-center mt-12">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 rounded-full shadow-xl transform hover:scale-105 transition-all duration-300"
-              onClick={() => navigate('/products')}
-            >
-              {t('products.viewAll')}
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+
+          {/* See More Products Button */}
+          <div className="text-center mt-16">
+            {currentPage < totalPages ? (
+              <Button 
+                size="lg" 
+                className={`bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-12 py-6 rounded-full shadow-xl transform hover:scale-105 transition-all duration-300 text-lg font-semibold ${
+                  isLoadingMore ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                onClick={handleSeeMoreProducts}
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                    लोड हो रहा है...
+                  </>
+                ) : (
+                  <>
+                    और उत्पाद देखें ({totalPages - currentPage} पेज बाकी)
+                    <ArrowRight className="ml-3 h-6 w-6" />
+                  </>
+                )}
+              </Button>
+            ) : (
+              <div className="text-center">
+                <Badge className="bg-green-600 text-white px-8 py-4 text-lg">
+                  ✅ सभी {displayedProducts.length} उत्पाद दिखाए गए
+                </Badge>
+                <p className="text-gray-600 mt-4 text-lg">
+                  अधिक उत्पादों के लिए उत्पाद पेज पर जाएं
+                </p>
+                <Button 
+                  size="lg" 
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-8 py-4 rounded-full shadow-xl transform hover:scale-105 transition-all duration-300 mt-4"
+                  onClick={() => navigate('/products')}
+                >
+                  सभी उत्पाद देखें
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>
