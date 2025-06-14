@@ -10,63 +10,110 @@ interface HomeVoiceSearchProps {
   disabled?: boolean;
 }
 
-const HomeVoiceSearch: React.FC<HomeVoiceSearchProps> = ({ setSearchQuery, onVoiceSearchResult, disabled }) => {
+const HomeVoiceSearch: React.FC<HomeVoiceSearchProps> = ({
+  setSearchQuery,
+  onVoiceSearchResult,
+  disabled,
+}) => {
   const recognitionRef = useRef<any>(null);
   const [isListening, setIsListening] = useState(false);
-  const { toast } = useToast();
+  const [retryToastId, setRetryToastId] = useState<string | null>(null);
+  const { toast, dismiss } = useToast();
+
+  const handleRecognitionError = (message = "Mic not detected or unclear audio, please speak again.") => {
+    setIsListening(false);
+    // Offer retry toast with a retry button action
+    const result = toast({
+      title: "Voice Search Error",
+      description: message,
+      variant: "destructive",
+      action: (
+        <Button
+          size="sm"
+          className="ml-2 bg-red-500 text-white"
+          onClick={() => {
+            dismiss(result.id);
+            startListening();
+          }}
+        >
+          Retry
+        </Button>
+      ),
+    });
+    setRetryToastId(result.id);
+  };
 
   const startListening = () => {
+    // Dismiss previous error toast
+    if (retryToastId) {
+      dismiss(retryToastId);
+      setRetryToastId(null);
+    }
+
+    // Feature detection
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast({
-        title: "Voice Search Not Supported",
-        description: "Your browser doesn't support voice recognition",
-        variant: "destructive",
-      });
+      handleRecognitionError("Your browser doesn't support voice recognition.");
       return;
     }
 
-    setIsListening(true);
+    // Attempt to start mic (browser will prompt if not already granted)
+    let SpeechRecognition;
+    try {
+      // @ts-ignore
+      SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    } catch (err) {
+      handleRecognitionError();
+      return;
+    }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
+    try {
+      const recognition = new SpeechRecognition();
 
-    recognitionRef.current = recognition;
-    recognition.continuous = false;
-    recognition.lang = 'hi-IN'; // Covers Hinglish (Hindi+English)
-    recognition.interimResults = false;
+      recognitionRef.current = recognition;
+      recognition.continuous = false;
+      recognition.lang = 'hi-IN'; // Use Hinglish (will recognize en-IN and hi-IN)
+      recognition.interimResults = false;
 
-    recognition.onstart = () => {
-      toast({
-        title: "Listening...",
-        description: "Speak your search (Hinglish ok!)",
-      });
-    };
+      setIsListening(true);
 
-    recognition.onerror = () => {
-      setIsListening(false);
-      toast({
-        title: "Voice Search Error",
-        description: "Could not recognize your voice. Try again.",
-        variant: "destructive",
-      });
-    };
+      recognition.onstart = () => {
+        toast({
+          title: "Listening...",
+          description: "Speak your search (Hinglish supported)",
+        });
+      };
 
-    recognition.onend = () => {
-      setIsListening(false);
-    };
+      recognition.onerror = (event: any) => {
+        setIsListening(false);
+        // Check for permissions / no mic
+        if (event.error === 'not-allowed' || event.error === 'denied') {
+          handleRecognitionError("Microphone access was denied. Please allow mic access and try again.");
+        } else if (event.error === 'no-speech' || event.error === 'audio-capture') {
+          handleRecognitionError("Mic not detected or unclear audio, please speak again.");
+        } else {
+          handleRecognitionError("Voice recognition failed, please try again.");
+        }
+      };
 
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setIsListening(false);
-      setSearchQuery(transcript);
-      onVoiceSearchResult(transcript);
-      toast({
-        title: "Voice Search",
-        description: `You said: "${transcript}"`,
-      });
-    };
+      recognition.onend = () => {
+        setIsListening(false);
+      };
 
-    recognition.start();
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript.trim();
+        setIsListening(false);
+        setSearchQuery(transcript);
+        onVoiceSearchResult(transcript);
+        toast({
+          title: "Voice Search",
+          description: `You said: "${transcript}"`,
+        });
+      };
+
+      recognition.start();
+    } catch (e) {
+      handleRecognitionError();
+    }
   };
 
   const stopListening = () => {
@@ -101,12 +148,29 @@ const HomeVoiceSearch: React.FC<HomeVoiceSearchProps> = ({ setSearchQuery, onVoi
       tabIndex={0}
     >
       {isListening ? (
-        <MicOff style={{ color: '#ff0000', width: 24, height: 24, display: 'inline-block' }} />
+        <MicOff
+          style={{
+            color: '#ff0000',
+            width: 24,
+            height: 24,
+            display: 'inline-block',
+            verticalAlign: 'middle',
+          }}
+        />
       ) : (
-        <Mic style={{ color: '#ff0000', width: 24, height: 24, display: 'inline-block' }} />
+        <Mic
+          style={{
+            color: '#ff0000',
+            width: 24,
+            height: 24,
+            display: 'inline-block',
+            verticalAlign: 'middle',
+          }}
+        />
       )}
     </button>
   );
 };
 
 export default HomeVoiceSearch;
+
