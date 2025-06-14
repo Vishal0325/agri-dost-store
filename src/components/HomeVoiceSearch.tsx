@@ -77,21 +77,35 @@ const HomeVoiceSearch: React.FC<HomeVoiceSearchProps> = ({ setSearchQuery, onVoi
   };
 
   return (
-    <Button
+    <button
       type="button"
-      variant="ghost"
-      size="sm"
-      className={`p-2 rounded-full transition-all duration-200 bg-red-500 text-white border-2 border-red-500 shadow-lg ${
-        disabled ? 'opacity-60 cursor-not-allowed' : ''
-      }`}
-      onClick={isListening ? stopListening : startListening}
-      title={isListening ? "Stop voice search" : "Start voice search"}
-      disabled={disabled}
-      style={{ minWidth: '40px', minHeight: '40px' }}
       aria-label="Voice input (Hinglish supported)"
+      onClick={isListening ? stopListening : startListening}
+      disabled={disabled}
+      title={isListening ? "Stop voice search" : "Start voice search"}
+      className="absolute right-12 top-1/2 -translate-y-1/2"
+      style={{
+        display: 'inline-block',
+        minWidth: 36,
+        minHeight: 36,
+        padding: 0,
+        background: 'none',
+        border: '2px solid #ff0000',
+        borderRadius: '50%',
+        outline: 'none',
+        color: '#ff0000',
+        zIndex: 20,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.6 : 1,
+      }}
+      tabIndex={0}
     >
-      {isListening ? <MicOff className="h-5 w-5 text-white" /> : <Mic className="h-5 w-5 text-white" />}
-    </Button>
+      {isListening ? (
+        <MicOff style={{ color: '#ff0000', width: 24, height: 24, display: 'inline-block' }} />
+      ) : (
+        <Mic style={{ color: '#ff0000', width: 24, height: 24, display: 'inline-block' }} />
+      )}
+    </button>
   );
 };
 
