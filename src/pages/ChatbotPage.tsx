@@ -12,6 +12,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import ApiConfiguration from '@/components/ApiConfiguration';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import VoiceSearch from '@/components/VoiceSearch';
 
 interface WeatherData {
   location: string;
@@ -250,6 +251,13 @@ Be practical, concise, and helpful. Focus on actionable farming advice.`;
     setProductSuggestions([]);
   };
 
+  const handleVoiceInput = (speechText: string) => {
+    if (!speechText.trim()) return;
+    setInputMessage('');
+    addMessage(speechText, 'user');
+    handleBotResponse(speechText);
+  };
+
   const formatTimestamp = (timestamp: Date) => {
     return new Date(timestamp).toLocaleTimeString('en-IN', {
       hour: '2-digit',
@@ -353,7 +361,8 @@ Be practical, concise, and helpful. Focus on actionable farming advice.`;
                   <div ref={messagesEndRef} />
                 </ScrollArea>
 
-                <div className="p-4 border-t flex gap-2">
+                <div className="p-4 border-t flex gap-2 items-center">
+                  <VoiceSearch onSearchResults={handleVoiceInput} />
                   <Input
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
