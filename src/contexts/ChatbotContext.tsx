@@ -35,6 +35,7 @@ interface ChatbotContextType {
   updateProfile: (profile: Partial<UserProfile>) => void;
   clearChat: () => void;
   detectLanguageAndIntent: (input: string) => { language: string; intent: string; isHinglish: boolean };
+  handleUserMessage: (input: string) => void;
 }
 
 const ChatbotContext = createContext<ChatbotContextType | undefined>(undefined);
@@ -87,11 +88,38 @@ export const ChatbotProvider = ({ children }: { children: React.ReactNode }) => 
       intent = 'market';
     } else if (lowerInput.match(/(disease|bimari|problem|samasya|pest|kida)/)) {
       intent = 'problem';
+    } else if (
+      lowerInput.match(
+        /(profile|meri profile|profile batao|my profile|show profile|update mobile|change address|update crop|update profile)/
+      )
+    ) {
+      intent = 'profile';
     }
     
     const detectedLanguage = isHinglish ? 'hinglish' : (language === 'hi' ? 'hindi' : 'english');
     
     return { language: detectedLanguage, intent, isHinglish };
+  };
+
+  // Action callbacks for profile actions
+  const promptForUpdateMobile = () => {
+    const message = language === 'hi'
+      ? 'कृपया नया मोबाइल नंबर लिखें:'
+      : 'Please enter your new mobile number:';
+    addMessage(message, 'bot');
+  };
+  const showBuyingHistory = () => handlePurchaseHistory();
+  const promptForUpdateCrops = () => {
+    const message = language === 'hi'
+      ? 'अपनी मुख्य फसलों के नाम लिखें (अल्पविराम से अलग करें):'
+      : 'Please enter your primary crops (separated by commas):';
+    addMessage(message, 'bot');
+  };
+  const promptForChangeAddress = () => {
+    const message = language === 'hi'
+      ? 'कृपया अपना नया पता (गांव, वार्ड आदि) लिखें:'
+      : 'Please enter your new address (village, ward, etc):';
+    addMessage(message, 'bot');
   };
 
   // Load profile from localStorage
@@ -295,6 +323,52 @@ export const ChatbotProvider = ({ children }: { children: React.ReactNode }) => 
     addMessage(message, 'bot');
   };
 
+  // INJECT: Handle profile intent with action options/buttons
+  const handleProfileActions = () => {
+    const message = language === 'hi'
+      ? 'यह रही आपकी प्रोफ़ाइल जानकारी:'
+      : 'Here are your profile details:';
+
+    const actions: ChatAction[] = [
+      {
+        id: 'updateMobile',
+        label: 'Update Mobile Number',
+        labelHindi: 'मोबाइल नंबर बदलें',
+        action: promptForUpdateMobile
+      },
+      {
+        id: 'viewHistory',
+        label: 'View Buying History',
+        labelHindi: 'खरीदारी इतिहास देखें',
+        action: showBuyingHistory
+      },
+      {
+        id: 'updateCrop',
+        label: 'Update Crop Info',
+        labelHindi: 'फसल जानकारी बदलें',
+        action: promptForUpdateCrops
+      },
+      {
+        id: 'changeAddress',
+        label: 'Change Address',
+        labelHindi: 'पता बदलें',
+        action: promptForChangeAddress
+      }
+    ];
+    addMessage(message, 'bot', actions);
+  };
+
+  // EXPORTED: Add new handleUserMessage function to be used by UI if needed
+  const handleUserMessage = (input: string) => {
+    const detected = detectLanguageAndIntent(input);
+    if (detected.intent === 'profile') {
+      handleProfileActions();
+    } else {
+      // fallback: original logic, just add the message
+      addMessage(input, 'user');
+    }
+  };
+
   return (
     <ChatbotContext.Provider value={{
       messages,
@@ -305,7 +379,8 @@ export const ChatbotProvider = ({ children }: { children: React.ReactNode }) => 
       closeChatbot,
       updateProfile,
       clearChat,
-      detectLanguageAndIntent
+      detectLanguageAndIntent,
+      handleUserMessage
     }}>
       {children}
     </ChatbotContext.Provider>
