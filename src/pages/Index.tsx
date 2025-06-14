@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Sprout, SprayCan, Wrench, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -134,6 +135,8 @@ const Index = () => {
       return;
     }
 
+    console.log('Performing search for:', query);
+
     const filteredProducts = products.filter(product => 
       product.name.toLowerCase().includes(query.toLowerCase()) ||
       product.badge.toLowerCase().includes(query.toLowerCase()) ||
@@ -148,6 +151,7 @@ const Index = () => {
       (query.toLowerCase().includes('irrigation') && product.name.toLowerCase().includes('irrigation'))
     );
     
+    console.log('Search results:', filteredProducts);
     setSearchResults(filteredProducts);
     setShowSearchResults(true);
     
@@ -157,23 +161,26 @@ const Index = () => {
     });
   };
 
-  // Handle text search
+  // Handle text search from button click
   const handleTextSearch = () => {
+    console.log('Search button clicked with query:', searchQuery);
     performSearch(searchQuery);
   };
 
-  // Handle voice search
+  // Handle voice search - updates the visible search query and performs search
   const handleVoiceSearch = (query: string) => {
-    setSearchQuery(query);
+    console.log('Voice search captured:', query);
+    setSearchQuery(query); // Update the visible search input
     performSearch(query);
   };
 
-  // Handle search input change
+  // Handle search input change with real-time feedback
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    console.log('Search input changed:', value);
     setSearchQuery(value);
     
-    // Perform instant search as user types
+    // Perform instant search as user types (after 2 characters)
     if (value.length > 2) {
       performSearch(value);
     } else if (value.length === 0) {
@@ -185,6 +192,7 @@ const Index = () => {
   // Handle Enter key press
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
+      console.log('Enter key pressed, performing search');
       handleTextSearch();
     }
   };
@@ -259,7 +267,7 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Enhanced Search bar with Text and Voice Search */}
+            {/* Enhanced Search bar with Real-time Text and Voice Search */}
             <div className="flex-1 max-w-2xl mx-8">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -268,7 +276,7 @@ const Index = () => {
                   value={searchQuery}
                   onChange={handleSearchInputChange}
                   onKeyPress={handleKeyPress}
-                  className="w-full pl-10 pr-20 py-3 rounded-full border-0 shadow-lg focus:ring-2 focus:ring-yellow-400"
+                  className="w-full pl-10 pr-20 py-3 rounded-full border-0 shadow-lg focus:ring-2 focus:ring-yellow-400 text-gray-900 placeholder:text-gray-500"
                 />
                 <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
                   <VoiceSearch onSearchResults={handleVoiceSearch} />
@@ -280,6 +288,12 @@ const Index = () => {
                   {t('common.search')}
                 </Button>
               </div>
+              {/* Real-time search feedback */}
+              {searchQuery && (
+                <div className="absolute top-full left-0 right-0 mt-1 text-xs text-green-200 bg-green-800/80 px-3 py-1 rounded-md backdrop-blur-sm">
+                  Searching for: "{searchQuery}"
+                </div>
+              )}
             </div>
 
             {/* Cart and Wallet */}
