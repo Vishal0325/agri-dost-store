@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Sprout, SprayCan, Wrench, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,12 +12,19 @@ import HeroSection from '@/components/HeroSection';
 import CategoryGrid from '@/components/CategoryGrid';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/hooks/use-toast';
+import VoiceSearch from '@/components/VoiceSearch';
+import SearchResults from '@/components/SearchResults';
 
 const Index = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { balance, deductMoney } = useWallet();
   const { toast } = useToast();
+  
+  // Add state for voice search
+  const [voiceSearchQuery, setVoiceSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const categories = [
     {
@@ -117,6 +124,27 @@ const Index = () => {
     }
   ];
 
+  // Add voice search handler
+  const handleVoiceSearch = (query: string) => {
+    setVoiceSearchQuery(query);
+    
+    // Filter products based on voice search query
+    const filteredProducts = products.filter(product => 
+      product.name.toLowerCase().includes(query.toLowerCase()) ||
+      product.badge.toLowerCase().includes(query.toLowerCase()) ||
+      (query.toLowerCase().includes('seed') && product.name.toLowerCase().includes('seed')) ||
+      (query.toLowerCase().includes('fertilizer') && product.name.toLowerCase().includes('fertilizer')) ||
+      (query.toLowerCase().includes('pesticide') && product.name.toLowerCase().includes('pesticide')) ||
+      (query.toLowerCase().includes('organic') && product.name.toLowerCase().includes('organic')) ||
+      (query.toLowerCase().includes('tomato') && product.name.toLowerCase().includes('tomato')) ||
+      (query.toLowerCase().includes('wheat') && product.name.toLowerCase().includes('wheat')) ||
+      (query.toLowerCase().includes('rice') && product.name.toLowerCase().includes('rice'))
+    );
+    
+    setSearchResults(filteredProducts);
+    setShowSearchResults(true);
+  };
+
   const handlePurchase = (product: any) => {
     const productPrice = product.price;
     
@@ -187,14 +215,17 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Search bar */}
+            {/* Search bar with Voice Search */}
             <div className="flex-1 max-w-2xl mx-8">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                 <Input
                   placeholder={t('header.search')}
-                  className="w-full pl-10 pr-4 py-3 rounded-full border-0 shadow-lg focus:ring-2 focus:ring-yellow-400"
+                  className="w-full pl-10 pr-20 py-3 rounded-full border-0 shadow-lg focus:ring-2 focus:ring-yellow-400"
                 />
+                <div className="absolute right-12 top-1/2 transform -translate-y-1/2">
+                  <VoiceSearch onSearchResults={handleVoiceSearch} />
+                </div>
                 <Button className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
                   {t('common.search')}
                 </Button>
@@ -255,6 +286,15 @@ const Index = () => {
           </div>
         </nav>
       </header>
+
+      {/* Voice Search Results Modal */}
+      {showSearchResults && (
+        <SearchResults 
+          query={voiceSearchQuery}
+          products={searchResults}
+          onClose={() => setShowSearchResults(false)}
+        />
+      )}
 
       {/* Hero Section */}
       <HeroSection />
