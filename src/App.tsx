@@ -14,6 +14,7 @@ import UpiPayment from './pages/UpiPayment';
 import PurchaseHistory from './pages/PurchaseHistory';
 import CropProducts from './pages/CropProducts';
 import Payment from './pages/Payment';
+import Wallet from './pages/Wallet';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
               <Route path="/upi-payment" element={<UpiPayment />} />
               <Route path="/purchase-history" element={<PurchaseHistory />} />
               <Route path="/crop-products" element={<CropProducts />} />
+              <Route path="/wallet" element={<Wallet />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
