@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Sprout, SprayCan, Wrench, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 import WalletDisplay from '@/components/WalletDisplay';
 import HeroSection from '@/components/HeroSection';
 import CategoryGrid from '@/components/CategoryGrid';
+import BrandsSection from '@/components/BrandsSection';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/hooks/use-toast';
 import VoiceSearch from '@/components/VoiceSearch';
@@ -423,6 +423,9 @@ const Index = () => {
 
       {/* Categories Section */}
       <CategoryGrid />
+
+      {/* Brands Section */}
+      <BrandsSection />
 
       {/* Featured Products - keep existing implementation */}
       <section className="py-20 bg-gradient-to-br from-gray-50 to-green-50">
