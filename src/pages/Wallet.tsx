@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ArrowLeft, Plus, CreditCard, Smartphone, Wallet, TrendingUp, History } from 'lucide-react';
+import { ArrowLeft, Plus, CreditCard, Smartphone, Wallet as WalletIcon, TrendingUp, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -43,7 +43,7 @@ const Wallet = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center space-x-3">
-              <Wallet className="h-8 w-8" />
+              <WalletIcon className="h-8 w-8" />
               <div>
                 <h1 className="text-2xl font-bold">My Wallet</h1>
                 <p className="text-green-100 text-sm">Manage your wallet balance</p>
@@ -68,7 +68,7 @@ const Wallet = () => {
                   </Badge>
                 </div>
               </div>
-              <Wallet className="h-12 w-12 text-green-200" />
+              <WalletIcon className="h-12 w-12 text-green-200" />
             </div>
           </div>
           
@@ -135,7 +135,7 @@ const Wallet = () => {
                         {transaction.type === 'credit' ? (
                           <Plus className={`h-4 w-4 ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`} />
                         ) : (
-                          <Wallet className={`h-4 w-4 ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`} />
+                          <WalletIcon className={`h-4 w-4 ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`} />
                         )}
                       </div>
                       <div>
@@ -153,7 +153,7 @@ const Wallet = () => {
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">
-                <Wallet className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                <WalletIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
                 <p>No transactions yet</p>
                 <p className="text-sm">Start by adding money to your wallet</p>
               </div>
