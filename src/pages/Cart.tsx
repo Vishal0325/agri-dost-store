@@ -138,7 +138,19 @@ Thank you for shopping with Agri Shop!
   };
 
   const handleCheckout = () => {
-    // Navigate to payment gateway instead of generating invoice immediately
+    // Store cart data and total for payment page
+    const orderData = {
+      items: cartItems,
+      subtotal,
+      shippingCost,
+      couponDiscount,
+      total,
+      appliedCoupon
+    };
+    
+    sessionStorage.setItem('orderData', JSON.stringify(orderData));
+    
+    // Navigate to payment gateway
     navigate('/payment');
   };
 
