@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, ShoppingCart, User, Phone, Truck, Leaf, Star, ArrowRight, Crown, Gift, Heart, Sprout, SprayCan, Wrench, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import HeroSection from '@/components/HeroSection';
 import CategoryGrid from '@/components/CategoryGrid';
 import BrandsSection from '@/components/BrandsSection';
 import { useWallet } from '@/contexts/WalletContext';
+import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import VoiceSearch from '@/components/VoiceSearch';
 
@@ -19,14 +21,13 @@ const Index = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { balance, deductMoney } = useWallet();
+  const { addToCart, getTotalItems } = useCart();
   const { toast } = useToast();
   
   // Add state for search functionality
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
-
-  // Add pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
@@ -82,7 +83,6 @@ const Index = () => {
     }
   ];
 
-  // Expanded product catalog with 300 products across 10 pages (30 per page)
   const allProducts = [
     // Page 1 Products (1-30)
     {
@@ -449,10 +449,9 @@ const Index = () => {
 
   // Get products for current page (30 products per page)
   const productsPerPage = 30;
-  const totalPages = 10; // Up to 10 pages as requested
+  const totalPages = 10;
   const displayedProducts = allProducts.slice(0, currentPage * productsPerPage);
 
-  // Enhanced search function for both text and voice
   const performSearch = (query: string) => {
     if (!query.trim()) {
       setSearchResults([]);
@@ -482,26 +481,22 @@ const Index = () => {
     setShowSearchResults(true);
   };
 
-  // Handle text search from button click
   const handleTextSearch = () => {
     console.log('Search button clicked with query:', searchQuery);
     performSearch(searchQuery);
   };
 
-  // Handle voice search - updates the visible search query and performs search
   const handleVoiceSearch = (query: string) => {
     console.log('Voice search captured:', query);
-    setSearchQuery(query); // Update the visible search input
+    setSearchQuery(query);
     performSearch(query);
   };
 
-  // Handle search input change with real-time feedback
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     console.log('Search input changed:', value);
     setSearchQuery(value);
     
-    // Perform instant search as user types (after 1 character)
     if (value.length > 0) {
       performSearch(value);
     } else {
@@ -510,7 +505,6 @@ const Index = () => {
     }
   };
 
-  // Handle Enter key press
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       console.log('Enter key pressed, performing search');
@@ -518,9 +512,7 @@ const Index = () => {
     }
   };
 
-  // Handle clicking outside search to close dropdown
   const handleSearchBlur = () => {
-    // Delay hiding results to allow clicking on them
     setTimeout(() => {
       setShowSearchResults(false);
     }, 200);
@@ -536,7 +528,7 @@ const Index = () => {
           title: "Purchase Successful!",
           description: `You bought ${product.name} for ₹${productPrice}`,
         });
-        setShowSearchResults(false); // Close search results after purchase
+        setShowSearchResults(false);
       }
     } else {
       toast({
@@ -547,12 +539,15 @@ const Index = () => {
     }
   };
 
-  // Handle "See More Products" button click
+  const handleAddToCart = (product: any) => {
+    console.log('Adding product to cart:', product);
+    addToCart(product);
+  };
+
   const handleSeeMoreProducts = () => {
     if (currentPage < totalPages) {
       setIsLoadingMore(true);
       
-      // Simulate loading delay
       setTimeout(() => {
         setCurrentPage(currentPage + 1);
         setIsLoadingMore(false);
@@ -718,7 +713,11 @@ const Index = () => {
                 onClick={() => navigate('/cart')}
               >
                 <ShoppingCart className="h-6 w-6" />
-                <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs">3</Badge>
+                {getTotalItems() > 0 && (
+                  <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs">
+                    {getTotalItems()}
+                  </Badge>
+                )}
                 <span className="ml-2 hidden md:inline">{t('header.cart')}</span>
               </Button>
             </div>
@@ -773,7 +772,7 @@ const Index = () => {
       {/* Brands Section */}
       <BrandsSection />
 
-      {/* Featured Products - Enhanced with Pagination */}
+      {/* Featured Products - Enhanced with Cart Functionality */}
       <section className="py-20 bg-gradient-to-br from-gray-50 to-green-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -844,21 +843,36 @@ const Index = () => {
                         </div>
                       </div>
                     </div>
-                    <Button 
-                      className={`w-full font-semibold py-2 rounded-full transform hover:scale-105 transition-all duration-200 ${
-                        balance >= product.price 
-                          ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white' 
-                          : 'bg-gray-400 text-white cursor-not-allowed'
-                      }`}
-                      disabled={balance < product.price}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePurchase(product);
-                      }}
-                    >
-                      <Wallet className="h-4 w-4 mr-2" />
-                      {balance >= product.price ? `वॉलेट से खरीदें ₹${product.price}` : 'अपर्याप्त बैलेंस'}
-                    </Button>
+                    
+                    {/* Action Buttons */}
+                    <div className="space-y-2">
+                      <Button 
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2 rounded-full transform hover:scale-105 transition-all duration-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToCart(product);
+                        }}
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        कार्ट में जोड़ें
+                      </Button>
+                      
+                      <Button 
+                        className={`w-full font-semibold py-2 rounded-full transform hover:scale-105 transition-all duration-200 ${
+                          balance >= product.price 
+                            ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white' 
+                            : 'bg-gray-400 text-white cursor-not-allowed'
+                        }`}
+                        disabled={balance < product.price}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePurchase(product);
+                        }}
+                      >
+                        <Wallet className="h-4 w-4 mr-2" />
+                        {balance >= product.price ? `वॉलेट से खरीदें ₹${product.price}` : 'अपर्याप्त बैलेंस'}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

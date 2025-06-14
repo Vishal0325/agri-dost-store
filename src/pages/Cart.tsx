@@ -1,406 +1,316 @@
+
 import React, { useState } from 'react';
-import { Plus, Minus, Trash2, ShoppingBag, ArrowRight, Tag, Download, FileText } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, ShoppingCart, Trash2, Wallet, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '@/contexts/CartContext';
+import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/hooks/use-toast';
-import { useLanguage } from '@/contexts/LanguageContext';
 
-const CartPage = () => {
+const Cart = () => {
   const navigate = useNavigate();
+  const { cartItems, removeFromCart, updateQuantity, clearCart, getTotalPrice, getTotalItems } = useCart();
+  const { balance, deductMoney } = useWallet();
   const { toast } = useToast();
-  const { t } = useLanguage();
-  
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Hybrid Tomato Seeds",
-      price: 450,
-      originalPrice: 550,
-      quantity: 2,
-      image: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3",
-      brand: "SeedCorp",
-      inStock: true
-    },
-    {
-      id: 2,
-      name: "Organic NPK Fertilizer",
-      price: 1200,
-      originalPrice: 1500,
-      quantity: 1,
-      image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3",
-      brand: "GreenGrow",
-      inStock: true
-    },
-    {
-      id: 3,
-      name: "Bio Pesticide Spray",
-      price: 800,
-      originalPrice: 950,
-      quantity: 1,
-      image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad649?ixlib=rb-4.0.3",
-      brand: "BioCare",
-      inStock: false
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const totalPrice = getTotalPrice();
+  const totalItems = getTotalItems();
+  const deliveryFee = totalPrice > 500 ? 0 : 50;
+  const finalTotal = totalPrice + deliveryFee;
+
+  const handleQuantityChange = (id: number, newQuantity: number) => {
+    if (newQuantity < 1) {
+      removeFromCart(id);
+    } else {
+      updateQuantity(id, newQuantity);
     }
-  ]);
+  };
 
-  const [couponCode, setCouponCode] = useState('');
-  const [appliedCoupon, setAppliedCoupon] = useState(null);
-
-  const updateQuantity = (id, newQuantity) => {
-    if (newQuantity === 0) {
-      removeItem(id);
+  const handleWalletCheckout = async () => {
+    if (cartItems.length === 0) {
+      toast({
+        title: "कार्ट खाली है",
+        description: "कृपया पहले कुछ उत्पाद जोड़ें",
+        variant: "destructive",
+      });
       return;
     }
-    setCartItems(items => 
-      items.map(item => 
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
 
-  const removeItem = (id) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
-
-  const applyCoupon = () => {
-    if (couponCode === 'SAVE10') {
-      setAppliedCoupon({ code: 'SAVE10', discount: 10, type: 'percentage' });
-    } else if (couponCode === 'NEWUSER50') {
-      setAppliedCoupon({ code: 'NEWUSER50', discount: 50, type: 'fixed' });
+    if (balance < finalTotal) {
+      toast({
+        title: "अपर्याप्त वॉलेट बैलेंस",
+        description: `आपके पास ₹${balance} है, लेकिन ₹${finalTotal} की आवश्यकता है`,
+        variant: "destructive",
+      });
+      return;
     }
+
+    setIsProcessing(true);
+    
+    // Simulate processing delay
+    setTimeout(() => {
+      const success = deductMoney(finalTotal);
+      if (success) {
+        toast({
+          title: "ऑर्डर सफल!",
+          description: `₹${finalTotal} का भुगतान पूरा हो गया। ${totalItems} उत्पाद ऑर्डर किए गए`,
+        });
+        clearCart();
+        navigate('/purchase-history');
+      }
+      setIsProcessing(false);
+    }, 2000);
   };
 
-  const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-  const savings = cartItems.reduce((total, item) => total + ((item.originalPrice - item.price) * item.quantity), 0);
-  const shippingCost = subtotal > 999 ? 0 : 50;
-  const couponDiscount = appliedCoupon 
-    ? appliedCoupon.type === 'percentage' 
-      ? (subtotal * appliedCoupon.discount / 100)
-      : appliedCoupon.discount
-    : 0;
-  const total = subtotal + shippingCost - couponDiscount;
-
-  const generateInvoice = () => {
-    const invoiceData = {
-      invoiceNumber: `INV-${Date.now()}`,
-      date: new Date().toLocaleDateString(),
-      items: cartItems,
-      subtotal,
-      savings,
-      shippingCost,
-      couponDiscount,
-      total,
-      customerData: JSON.parse(localStorage.getItem('customerData') || '{}')
-    };
+  const handlePaymentGateway = () => {
+    if (cartItems.length === 0) {
+      toast({
+        title: "कार्ट खाली है",
+        description: "कृपया पहले कुछ उत्पाद जोड़ें",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    // Save to purchase history
-    const existingHistory = JSON.parse(localStorage.getItem('purchaseHistory') || '[]');
-    existingHistory.unshift(invoiceData);
-    localStorage.setItem('purchaseHistory', JSON.stringify(existingHistory));
-    
-    // Generate and download invoice
-    const invoiceContent = `
-AGRI SHOP INVOICE
-==================
-Invoice Number: ${invoiceData.invoiceNumber}
-Date: ${invoiceData.date}
-Customer: ${invoiceData.customerData.name || 'Guest'}
-Village: ${invoiceData.customerData.village || 'N/A'}
-Ward: ${invoiceData.customerData.ward || 'N/A'}
-Mobile: ${invoiceData.customerData.mobile || 'N/A'}
-
-ITEMS:
-------
-${cartItems.map(item => `${item.name} x${item.quantity} - ₹${(item.price * item.quantity).toLocaleString()}`).join('\n')}
-
-SUMMARY:
---------
-Subtotal: ₹${subtotal.toLocaleString()}
-Savings: -₹${savings.toLocaleString()}
-Shipping: ₹${shippingCost}
-${appliedCoupon ? `Coupon Discount: -₹${couponDiscount.toLocaleString()}` : ''}
-TOTAL: ₹${total.toLocaleString()}
-
-Thank you for shopping with Agri Shop!
-    `;
-    
-    const blob = new Blob([invoiceContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `invoice-${invoiceData.invoiceNumber}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    navigate('/payment', { 
+      state: { 
+        amount: finalTotal, 
+        items: cartItems,
+        type: 'cart_checkout'
+      } 
+    });
   };
-
-  const handleCheckout = () => {
-    // Store cart data and total for payment page
-    const orderData = {
-      items: cartItems,
-      subtotal,
-      shippingCost,
-      couponDiscount,
-      total,
-      appliedCoupon
-    };
-    
-    sessionStorage.setItem('orderData', JSON.stringify(orderData));
-    
-    // Navigate to payment gateway
-    navigate('/payment');
-  };
-
-  const handleContinueShopping = () => {
-    navigate('/products');
-  };
-
-  if (cartItems.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <ShoppingBag className="h-24 w-24 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('cart.empty')}</h2>
-          <p className="text-gray-600 mb-6">{t('cart.emptyDescription')}</p>
-          <Button 
-            className="bg-green-600 hover:bg-green-700"
-            onClick={handleContinueShopping}
-          >
-            {t('cart.continueShopping')}
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">{t('cart.title')} ({cartItems.length} {t('cart.items')})</h1>
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/purchase-history')}
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            {t('cart.purchaseHistory')}
-          </Button>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+      {/* Header */}
+      <div className="bg-white shadow-lg border-b">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center space-x-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate(-1)}
+              className="flex items-center space-x-2 hover:bg-green-50"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span>वापस जाएं</span>
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 flex items-center">
+                <ShoppingCart className="h-8 w-8 mr-3 text-green-600" />
+                आपका कार्ट
+              </h1>
+              <p className="text-gray-600 mt-1">
+                {totalItems > 0 ? `${totalItems} उत्पाद • कुल ₹${totalPrice.toLocaleString()}` : 'कार्ट खाली है'}
+              </p>
+            </div>
+          </div>
         </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  {cartItems.map((item) => (
-                    <div key={item.id}>
-                      <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
-                        <div className="flex-shrink-0">
-                          <img 
-                            src={item.image} 
-                            alt={item.name}
-                            className="w-24 h-24 object-cover rounded-lg"
-                          />
-                        </div>
-                        
-                        <div className="flex-1">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <p className="text-sm text-gray-600">{item.brand}</p>
-                              <h3 className="font-semibold text-lg">{item.name}</h3>
-                              {!item.inStock && (
-                                <Badge variant="destructive" className="mt-1">{t('cart.outOfStock')}</Badge>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
+        {cartItems.length === 0 ? (
+          /* Empty Cart */
+          <div className="text-center py-16">
+            <div className="bg-white rounded-2xl shadow-xl p-12 max-w-md mx-auto">
+              <ShoppingCart className="h-24 w-24 text-gray-300 mx-auto mb-6" />
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">आपका कार्ट खाली है</h2>
+              <p className="text-gray-600 mb-8">अभी तक कोई उत्पाद नहीं जोड़ा गया है</p>
+              <Button 
+                size="lg"
+                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
+                onClick={() => navigate('/')}
+              >
+                खरीदारी शुरू करें
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Cart Items */}
+            <div className="lg:col-span-2">
+              <Card className="shadow-xl border-0">
+                <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center justify-between">
+                    <span>कार्ट आइटम ({totalItems})</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-white hover:bg-green-600"
+                      onClick={clearCart}
+                    >
+                      सभी हटाएं
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-6">
+                    {cartItems.map((item) => (
+                      <div key={item.id} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
+                        <img 
+                          src={item.image} 
+                          alt={item.name}
+                          className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg text-gray-900 line-clamp-2">
+                                {item.name}
+                              </h3>
+                              <p className="text-sm text-green-600 font-medium">{item.company}</p>
+                              {item.badge && (
+                                <Badge className="mt-1">{item.badge}</Badge>
                               )}
                             </div>
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => removeItem(item.id)}
-                              className="text-red-600 hover:text-red-700"
+                              onClick={() => removeFromCart(item.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                           
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <span className="text-lg font-bold text-green-600">₹{item.price.toLocaleString()}</span>
-                              <span className="text-sm text-gray-500 line-through">₹{item.originalPrice.toLocaleString()}</span>
+                          <div className="flex items-center justify-between mt-4">
+                            <div className="flex items-center space-x-3">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Minus className="h-3 w-3" />
+                              </Button>
+                              <span className="font-semibold text-lg w-8 text-center">
+                                {item.quantity}
+                              </span>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
                             </div>
-                            
-                            <div className="flex items-center space-x-2">
-                              <div className="flex items-center border rounded-lg">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                  disabled={!item.inStock}
-                                >
-                                  <Minus className="h-4 w-4" />
-                                </Button>
-                                <span className="px-3 py-1 min-w-[2.5rem] text-center">{item.quantity}</span>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                  disabled={!item.inStock}
-                                >
-                                  <Plus className="h-4 w-4" />
-                                </Button>
-                              </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-green-600">
+                                ₹{(item.price * item.quantity).toLocaleString()}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                ₹{item.price} प्रति यूनिट
+                              </p>
                             </div>
                           </div>
                         </div>
                       </div>
-                      
-                      {item.id !== cartItems[cartItems.length - 1].id && <Separator className="mt-6" />}
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Order Summary */}
+            <div className="lg:col-span-1">
+              <Card className="shadow-xl border-0 sticky top-8">
+                <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+                  <CardTitle>ऑर्डर सारांश</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span>उत्पाद ({totalItems})</span>
+                      <span>₹{totalPrice.toLocaleString()}</span>
                     </div>
-                  ))}
-                </div>
-                
-                <Separator className="my-6" />
-                
-                {/* Coupon Section */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold">{t('cart.applyCoupon')}</h3>
-                  <div className="flex space-x-2">
-                    <Input 
-                      placeholder={t('cart.enterCoupon')}
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button variant="outline" onClick={applyCoupon}>
-                      <Tag className="h-4 w-4 mr-2" />
-                      {t('cart.apply')}
+                    <div className="flex justify-between">
+                      <span>डिलीवरी शुल्क</span>
+                      <span className={deliveryFee === 0 ? 'text-green-600 font-semibold' : ''}>
+                        {deliveryFee === 0 ? 'मुफ्त' : `₹${deliveryFee}`}
+                      </span>
+                    </div>
+                    {deliveryFee === 0 && (
+                      <p className="text-xs text-green-600">
+                        ₹500+ ऑर्डर पर मुफ्त डिलीवरी
+                      </p>
+                    )}
+                    <Separator />
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>कुल राशि</span>
+                      <span className="text-green-600">₹{finalTotal.toLocaleString()}</span>
+                    </div>
+                    
+                    {/* Wallet Balance Display */}
+                    <div className="p-4 bg-gradient-to-r from-green-100 to-green-200 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">वॉलेट बैलेंस</span>
+                        <span className="text-xl font-bold text-green-700">
+                          ₹{balance.toLocaleString()}
+                        </span>
+                      </div>
+                      {balance < finalTotal && (
+                        <p className="text-sm text-red-600 mt-2">
+                          ₹{(finalTotal - balance).toLocaleString()} अधिक बैलेंस चाहिए
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Checkout Buttons */}
+                  <div className="space-y-3 mt-6">
+                    <Button 
+                      className={`w-full py-3 font-semibold rounded-xl transition-all duration-200 ${
+                        balance >= finalTotal 
+                          ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white transform hover:scale-105' 
+                          : 'bg-gray-400 text-white cursor-not-allowed'
+                      }`}
+                      disabled={balance < finalTotal || isProcessing}
+                      onClick={handleWalletCheckout}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                          प्रक्रिया में...
+                        </>
+                      ) : (
+                        <>
+                          <Wallet className="h-5 w-5 mr-2" />
+                          वॉलेट से भुगतान करें
+                        </>
+                      )}
+                    </Button>
+                    
+                    <Button 
+                      variant="outline" 
+                      className="w-full py-3 font-semibold rounded-xl border-2 border-blue-500 text-blue-600 hover:bg-blue-50 transform hover:scale-105 transition-all duration-200"
+                      onClick={handlePaymentGateway}
+                    >
+                      <CreditCard className="h-5 w-5 mr-2" />
+                      कार्ड/UPI से भुगतान करें
                     </Button>
                   </div>
-                  
-                  {appliedCoupon && (
-                    <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg">
-                      <span className="text-green-700 font-medium">
-                        {t('cart.couponApplied')} "{appliedCoupon.code}"!
-                      </span>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => setAppliedCoupon(null)}
-                        className="text-green-700 hover:text-green-800"
-                      >
-                        {t('cart.remove')}
-                      </Button>
-                    </div>
-                  )}
-                  
-                  <div className="text-sm text-gray-600">
-                    <p>{t('cart.availableCoupons')}: SAVE10 (10% off), NEWUSER50 (₹50 off)</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
-          {/* Order Summary */}
-          <div>
-            <Card className="sticky top-4">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-semibold mb-4">{t('cart.orderSummary')}</h3>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>{t('cart.subtotal')} ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} {t('cart.items')})</span>
-                    <span>₹{subtotal.toLocaleString()}</span>
-                  </div>
-                  
-                  <div className="flex justify-between text-green-600">
-                    <span>{t('cart.savings')}</span>
-                    <span>-₹{savings.toLocaleString()}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span>{t('cart.shipping')}</span>
-                    <span className={shippingCost === 0 ? 'text-green-600 font-medium' : ''}>
-                      {shippingCost === 0 ? t('cart.free') : `₹${shippingCost}`}
-                    </span>
-                  </div>
-                  
-                  {appliedCoupon && (
-                    <div className="flex justify-between text-green-600">
-                      <span>{t('cart.couponDiscount')}</span>
-                      <span>-₹{couponDiscount.toLocaleString()}</span>
-                    </div>
-                  )}
-                  
-                  <Separator />
-                  
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>{t('cart.total')}</span>
-                    <span>₹{total.toLocaleString()}</span>
-                  </div>
-                </div>
-                
-                {shippingCost > 0 && (
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-700">
-                      {t('cart.freeShippingMessage')} ₹{(999 - subtotal).toLocaleString()}!
-                    </p>
-                  </div>
-                )}
-                
-                <Button 
-                  className="w-full mt-6 bg-green-600 hover:bg-green-700 text-lg py-3"
-                  onClick={handleCheckout}
-                >
-                  {t('cart.proceedToCheckout')}
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-                
-                <div className="mt-4 text-center">
+                  {/* Continue Shopping */}
                   <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={handleContinueShopping}
+                    variant="ghost" 
+                    className="w-full mt-4 text-green-600 hover:text-green-700 hover:bg-green-50"
+                    onClick={() => navigate('/')}
                   >
-                    {t('cart.continueShopping')}
+                    खरीदारी जारी रखें
                   </Button>
-                </div>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full mt-2"
-                  onClick={generateInvoice}
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  {t('cart.downloadInvoice')}
-                </Button>
-                
-                {/* Payment Methods */}
-                <div className="mt-6">
-                  <h4 className="font-medium mb-3">{t('cart.weAccept')}</h4>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline">UPI</Badge>
-                    <Badge variant="outline">COD</Badge>
-                    <Badge variant="outline">Cards</Badge>
-                    <Badge variant="outline">Net Banking</Badge>
-                  </div>
-                </div>
-                
-                {/* Security */}
-                <div className="mt-4 text-center text-sm text-gray-600">
-                  <p>🔒 {t('cart.secureCheckout')}</p>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default CartPage;
+export default Cart;
