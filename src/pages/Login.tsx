@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -20,10 +21,18 @@ interface LoginFormData {
   district: string;
 }
 
+interface PostOffice {
+  Name: string;
+  District: string;
+  Block: string;
+  State: string;
+}
+
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [availableLocations, setAvailableLocations] = useState<PostOffice[]>([]);
 
   const form = useForm<LoginFormData>({
     defaultValues: {
@@ -39,38 +48,37 @@ const Login = () => {
   });
 
   const fetchLocationByPincode = async (pincode: string) => {
-    if (pincode.length !== 6) return;
+    if (pincode.length !== 6) {
+      setAvailableLocations([]);
+      return;
+    }
     
     setIsLoadingLocation(true);
     try {
-      // Mock API call - in real implementation, you would use a postal code API
       const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
       const data = await response.json();
       
       if (data[0].Status === 'Success' && data[0].PostOffice.length > 0) {
-        const postOffice = data[0].PostOffice[0];
-        
-        form.setValue('village', postOffice.Name || '');
-        form.setValue('post', postOffice.Name || '');
-        form.setValue('district', postOffice.District || '');
-        form.setValue('subBlock', postOffice.Block || '');
+        setAvailableLocations(data[0].PostOffice);
         
         toast({
-          title: "Location Found",
-          description: `Address auto-filled for ${postOffice.Name}, ${postOffice.District}`,
+          title: "Locations Found",
+          description: `${data[0].PostOffice.length} locations found for PIN ${pincode}`,
         });
       } else {
+        setAvailableLocations([]);
         toast({
           title: "Location Not Found",
-          description: "Please enter address details manually",
+          description: "No locations found for this PIN code",
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error('Error fetching location:', error);
+      setAvailableLocations([]);
       toast({
         title: "Error",
-        description: "Could not fetch location. Please enter manually.",
+        description: "Could not fetch locations. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -89,10 +97,34 @@ const Login = () => {
 
   const handlePincodeChange = (value: string) => {
     form.setValue('pincode', value);
+    // Clear previous selections when PIN code changes
+    form.setValue('village', '');
+    form.setValue('post', '');
+    form.setValue('subBlock', '');
+    form.setValue('district', '');
+    
     if (value.length === 6 && /^\d{6}$/.test(value)) {
       fetchLocationByPincode(value);
+    } else {
+      setAvailableLocations([]);
     }
   };
+
+  const handleLocationSelect = (locationName: string) => {
+    const selectedLocation = availableLocations.find(loc => loc.Name === locationName);
+    if (selectedLocation) {
+      form.setValue('village', selectedLocation.Name);
+      form.setValue('post', selectedLocation.Name);
+      form.setValue('subBlock', selectedLocation.Block);
+      form.setValue('district', selectedLocation.District);
+    }
+  };
+
+  // Get unique values for dropdowns
+  const uniqueVillages = [...new Set(availableLocations.map(loc => loc.Name))];
+  const uniquePosts = [...new Set(availableLocations.map(loc => loc.Name))];
+  const uniqueBlocks = [...new Set(availableLocations.map(loc => loc.Block))];
+  const uniqueDistricts = [...new Set(availableLocations.map(loc => loc.District))];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
@@ -213,7 +245,7 @@ const Login = () => {
                           <div className="relative">
                             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input 
-                              placeholder="Enter PIN code for auto-fill" 
+                              placeholder="Enter PIN code to load locations" 
                               className="pl-10" 
                               {...field}
                               onChange={(e) => {
@@ -240,7 +272,22 @@ const Login = () => {
                         <FormItem>
                           <FormLabel>Village</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter village" {...field} />
+                            {uniqueVillages.length > 0 ? (
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select village" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {uniqueVillages.map((village) => (
+                                    <SelectItem key={village} value={village}>
+                                      {village}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Input placeholder="Enter village" {...field} />
+                            )}
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -272,7 +319,22 @@ const Login = () => {
                         <FormItem>
                           <FormLabel>Post Office</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter post office" {...field} />
+                            {uniquePosts.length > 0 ? (
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select post office" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {uniquePosts.map((post) => (
+                                    <SelectItem key={post} value={post}>
+                                      {post}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Input placeholder="Enter post office" {...field} />
+                            )}
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -287,7 +349,22 @@ const Login = () => {
                         <FormItem>
                           <FormLabel>Sub Block</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter sub block" {...field} />
+                            {uniqueBlocks.length > 0 ? (
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select sub block" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {uniqueBlocks.map((block) => (
+                                    <SelectItem key={block} value={block}>
+                                      {block}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Input placeholder="Enter sub block" {...field} />
+                            )}
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -303,7 +380,22 @@ const Login = () => {
                       <FormItem>
                         <FormLabel>District</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter district" {...field} />
+                          {uniqueDistricts.length > 0 ? (
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select district" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {uniqueDistricts.map((district) => (
+                                  <SelectItem key={district} value={district}>
+                                    {district}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input placeholder="Enter district" {...field} />
+                          )}
                         </FormControl>
                         <FormMessage />
                       </FormItem>
