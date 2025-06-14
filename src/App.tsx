@@ -9,6 +9,7 @@ import Blog from './pages/Blog';
 import Cart from './pages/Cart';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
+import BrandDetail from './pages/BrandDetail';
 import { WalletProvider } from './contexts/WalletContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { Toaster } from '@/components/ui/toaster';
@@ -29,6 +30,7 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/products" element={<Products />} />
               <Route path="/product/:id" element={<ProductDetail />} />
+              <Route path="/brand/:brandName" element={<BrandDetail />} />
               <Route path="/upload" element={<ProductUpload />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/cart" element={<Cart />} />

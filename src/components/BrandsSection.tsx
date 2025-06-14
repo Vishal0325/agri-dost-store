@@ -1,12 +1,18 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowRight, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useNavigate } from 'react-router-dom';
 
 const BrandsSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleBrandClick = (brandName: string) => {
+    console.log('Navigating to brand:', brandName);
+    navigate(`/brand/${encodeURIComponent(brandName)}`);
+  };
 
   // Featured brands for homepage display
   const featuredBrands = [
@@ -132,6 +138,7 @@ const BrandsSection = () => {
             <Card 
               key={brand.id} 
               className="group cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl border-0 bg-white overflow-hidden"
+              onClick={() => handleBrandClick(brand.name)}
             >
               <CardContent className="p-6 text-center">
                 <div className="mb-4">
@@ -175,6 +182,10 @@ const BrandsSection = () => {
                   <div 
                     key={brand.id} 
                     className="group cursor-pointer transform hover:scale-105 transition-all duration-300 bg-white p-4 rounded-lg shadow-md hover:shadow-lg border"
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      handleBrandClick(brand.name);
+                    }}
                   >
                     <div className="text-center">
                       <div className="mb-3">
