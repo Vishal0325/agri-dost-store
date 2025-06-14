@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ArrowLeft, Plus, CreditCard, Smartphone, Wallet as WalletIcon, TrendingUp, History } from 'lucide-react';
+import { ArrowLeft, Plus, CreditCard, Smartphone, Wallet as WalletIcon, TrendingUp, History, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -133,9 +133,9 @@ const Wallet = () => {
                         transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100'
                       }`}>
                         {transaction.type === 'credit' ? (
-                          <Plus className={`h-4 w-4 ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`} />
+                          <Plus className="h-4 w-4 text-green-600" />
                         ) : (
-                          <WalletIcon className={`h-4 w-4 ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`} />
+                          <Minus className="h-4 w-4 text-red-600" />
                         )}
                       </div>
                       <div>
