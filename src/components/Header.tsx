@@ -15,6 +15,7 @@ import UserMenu from './UserMenu';
 import { allProducts } from '@/lib/products';
 import HomeVoiceSearch from './HomeVoiceSearch';
 import LocationDisplay from './LocationDisplay';
+import AppSidebar from './AppSidebar';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -139,19 +140,22 @@ const Header = () => {
 
             <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
-                        <div className="bg-white p-2 rounded-full">
-                            <Leaf className="h-8 w-8 text-green-600" />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                                {t('header.title')}
-                            </h1>
-                            <p className="text-sm text-green-200">{t('header.subtitle')}</p>
+                    <div className="flex items-center space-x-2 md:space-x-4">
+                        <AppSidebar />
+                        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
+                            <div className="bg-white p-2 rounded-full">
+                                <Leaf className="h-8 w-8 text-green-600" />
+                            </div>
+                            <div className="hidden md:block">
+                                <h1 className="text-2xl font-bold bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+                                    {t('header.title')}
+                                </h1>
+                                <p className="text-sm text-green-200">{t('header.subtitle')}</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex-1 max-w-2xl mx-8">
+                    <div className="flex-1 max-w-2xl mx-2 md:mx-8">
                         <div className="relative">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 z-10" />
@@ -224,10 +228,12 @@ const Header = () => {
                                 </div>
                             )}
                         </div>
-                        <LocationDisplay />
+                        <div className="hidden md:block">
+                            <LocationDisplay />
+                        </div>
                     </div>
 
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-1 md:space-x-4">
                         <WalletDisplay variant="inline" />
                         <Button
                             variant="ghost"
@@ -244,11 +250,14 @@ const Header = () => {
                         </Button>
                     </div>
                 </div>
+                <div className="md:hidden mt-2">
+                    <LocationDisplay />
+                </div>
             </div>
 
             <nav className="border-t border-green-500 bg-green-700">
                 <div className="container mx-auto px-4">
-                    <div className="flex items-center justify-center space-x-6 py-3 flex-wrap">
+                    <div className="hidden md:flex items-center justify-center space-x-6 py-3 flex-wrap">
                         {categories.map((category) => {
                             const Icon = category.icon;
                             return (
