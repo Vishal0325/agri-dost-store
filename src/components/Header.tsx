@@ -14,6 +14,7 @@ import VoiceSearch from '@/components/VoiceSearch';
 import UserMenu from './UserMenu';
 import { allProducts } from '@/lib/products';
 import HomeVoiceSearch from './HomeVoiceSearch';
+import LocationDisplay from './LocationDisplay';
 
 const Header = () => {
     const navigate = useNavigate();
@@ -150,78 +151,80 @@ const Header = () => {
                         </div>
                     </div>
 
-                    <div className="flex-1 max-w-2xl mx-8 relative">
+                    <div className="flex-1 max-w-2xl mx-8">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 z-10" />
-                            <Input
-                                placeholder={t('header.search')}
-                                value={searchQuery}
-                                onChange={handleSearchInputChange}
-                                onKeyPress={handleKeyPress}
-                                onBlur={handleSearchBlur}
-                                onFocus={() => searchQuery && setShowSearchResults(true)}
-                                className="w-full pl-10 pr-20 py-3 rounded-full border-0 shadow-lg focus:ring-2 focus:ring-yellow-400 text-gray-900 placeholder:text-gray-500"
-                            />
-                            <div className="absolute right-12 top-1/2 transform -translate-y-1/2 z-10">
-                                {/* Replace with new HomeVoiceSearch mic button */}
-                                <HomeVoiceSearch
-                                    setSearchQuery={setSearchQuery}
-                                    onVoiceSearchResult={handleHomeVoiceSearch}
-                                    disabled={false}
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 z-10" />
+                                <Input
+                                    placeholder={t('header.search')}
+                                    value={searchQuery}
+                                    onChange={handleSearchInputChange}
+                                    onKeyPress={handleKeyPress}
+                                    onBlur={handleSearchBlur}
+                                    onFocus={() => searchQuery && setShowSearchResults(true)}
+                                    className="w-full pl-10 pr-20 py-3 rounded-full border-0 shadow-lg focus:ring-2 focus:ring-yellow-400 text-gray-900 placeholder:text-gray-500"
                                 />
+                                <div className="absolute right-12 top-1/2 transform -translate-y-1/2 z-10">
+                                    {/* Replace with new HomeVoiceSearch mic button */}
+                                    <HomeVoiceSearch
+                                        setSearchQuery={setSearchQuery}
+                                        onVoiceSearchResult={handleHomeVoiceSearch}
+                                        disabled={false}
+                                    />
+                                </div>
+                                <Button
+                                    className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 z-10"
+                                    onClick={handleTextSearch}
+                                >
+                                    {t('common.search')}
+                                </Button>
                             </div>
-                            <Button
-                                className="absolute right-1 top-1/2 transform -translate-y-1/2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 z-10"
-                                onClick={handleTextSearch}
-                            >
-                                {t('common.search')}
-                            </Button>
-                        </div>
-
-                        {showSearchResults && searchQuery && (
-                            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
-                                {searchResults.length === 0 ? (
-                                    <div className="p-4 text-center text-gray-500">
-                                        <p>No products found for "{searchQuery}"</p>
-                                    </div>
-                                ) : (
-                                    <div className="p-2">
-                                        <div className="text-xs text-gray-500 px-3 py-2 border-b">
-                                            {searchResults.length} products found
+                             {showSearchResults && searchQuery && (
+                                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 max-h-96 overflow-y-auto">
+                                    {searchResults.length === 0 ? (
+                                        <div className="p-4 text-center text-gray-500">
+                                            <p>No products found for "{searchQuery}"</p>
                                         </div>
-                                        {searchResults.map((product) => (
-                                            <div key={product.id} className="p-3 hover:bg-gray-50 border-b last:border-b-0 cursor-pointer" onClick={() => navigate(`/product/${product.id}`)}>
-                                                <div className="flex items-center space-x-3">
-                                                    <img
-                                                        src={product.image}
-                                                        alt={product.name}
-                                                        className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
-                                                    />
-                                                    <div className="flex-1 min-w-0">
-                                                        <h4 className="font-medium text-gray-900 text-sm line-clamp-1">{product.name}</h4>
-                                                        <div className="flex items-center justify-between mt-2">
-                                                            <div className="flex items-center space-x-2">
-                                                                <span className="font-bold text-green-600">₹{product.price.toLocaleString()}</span>
-                                                                <span className="text-sm text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
+                                    ) : (
+                                        <div className="p-2">
+                                            <div className="text-xs text-gray-500 px-3 py-2 border-b">
+                                                {searchResults.length} products found
+                                            </div>
+                                            {searchResults.map((product) => (
+                                                <div key={product.id} className="p-3 hover:bg-gray-50 border-b last:border-b-0 cursor-pointer" onClick={() => navigate(`/product/${product.id}`)}>
+                                                    <div className="flex items-center space-x-3">
+                                                        <img
+                                                            src={product.image}
+                                                            alt={product.name}
+                                                            className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+                                                        />
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-medium text-gray-900 text-sm line-clamp-1">{product.name}</h4>
+                                                            <div className="flex items-center justify-between mt-2">
+                                                                <div className="flex items-center space-x-2">
+                                                                    <span className="font-bold text-green-600">₹{product.price.toLocaleString()}</span>
+                                                                    <span className="text-sm text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
+                                                                </div>
+                                                                <Button
+                                                                    size="sm"
+                                                                    className={`text-xs px-3 py-1 ${balance >= product.price ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-400 text-white cursor-not-allowed'}`}
+                                                                    disabled={balance < product.price}
+                                                                    onClick={(e) => { e.stopPropagation(); handlePurchase(product); }}
+                                                                >
+                                                                    <Wallet className="h-3 w-3 mr-1" />
+                                                                    Buy
+                                                                </Button>
                                                             </div>
-                                                            <Button
-                                                                size="sm"
-                                                                className={`text-xs px-3 py-1 ${balance >= product.price ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-400 text-white cursor-not-allowed'}`}
-                                                                disabled={balance < product.price}
-                                                                onClick={(e) => { e.stopPropagation(); handlePurchase(product); }}
-                                                            >
-                                                                <Wallet className="h-3 w-3 mr-1" />
-                                                                Buy
-                                                            </Button>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <LocationDisplay />
                     </div>
 
                     <div className="flex items-center space-x-4">
