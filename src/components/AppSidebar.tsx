@@ -7,7 +7,7 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu, Home, Bug, ShieldCheck, Sprout, Microscope, Seedling, Wrench, Info, Phone, X } from 'lucide-react';
+import { Menu, Home, Bug, ShieldCheck, Sprout, Microscope, Leaf, Wrench, Info, Phone, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -20,7 +20,7 @@ const AppSidebar = () => {
     { title: t('categories.fungicide'), href: '/products', icon: ShieldCheck },
     { title: t('categories.pgr'), href: '/products', icon: Sprout },
     { title: t('categories.miticide'), href: '/products', icon: Microscope },
-    { title: t('categories.seeds'), href: '/products', icon: Seedling },
+    { title: t('categories.seeds'), href: '/products', icon: Leaf },
     { title: t('categories.tools'), href: '/products', icon: Wrench },
     { title: 'About Us', href: '/blog', icon: Info },
     { title: 'Contact Info', href: '/', icon: Phone },
