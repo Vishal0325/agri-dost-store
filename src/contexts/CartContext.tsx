@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -10,6 +9,7 @@ export interface CartItem {
   company: string;
   quantity: number;
   badge?: string;
+  selectedForCheckout: boolean;
 }
 
 interface CartContextType {
@@ -20,6 +20,9 @@ interface CartContextType {
   clearCart: () => void;
   getTotalPrice: () => number;
   getTotalItems: () => number;
+  toggleItemSelection: (id: number) => void;
+  removePurchasedItems: () => void;
+  selectAllItems: (select: boolean) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -47,10 +50,10 @@ export const CartProvider = ({ children }: CartProviderProps) => {
       const existingItem = prevItems.find(item => item.id === product.id);
       
       if (existingItem) {
-        // Update quantity if item already exists
+        // Update quantity and set as selected if item already exists
         const updatedItems = prevItems.map(item =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + 1, selectedForCheckout: true }
             : item
         );
         
@@ -61,7 +64,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         
         return updatedItems;
       } else {
-        // Add new item
+        // Add new item and set as selected
         const newItem: CartItem = {
           id: product.id,
           name: product.name,
@@ -70,6 +73,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
           company: product.company,
           quantity: 1,
           badge: product.badge,
+          selectedForCheckout: true,
         };
         
         toast({
@@ -114,12 +118,38 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     });
   };
 
+  const toggleItemSelection = (id: number) => {
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item.id === id ? { ...item, selectedForCheckout: !item.selectedForCheckout } : item
+      )
+    );
+  };
+  
+  const selectAllItems = (select: boolean) => {
+    setCartItems(prevItems =>
+      prevItems.map(item => ({ ...item, selectedForCheckout: select }))
+    );
+  };
+
+  const removePurchasedItems = () => {
+    setCartItems(prevItems => prevItems.filter(item => !item.selectedForCheckout));
+    toast({
+      title: "खरीदारी पूरी हुई",
+      description: "खरीदे गए आइटम आपके कार्ट से हटा दिए गए हैं।",
+    });
+  };
+
   const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cartItems
+      .filter(item => item.selectedForCheckout)
+      .reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
   const getTotalItems = () => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0);
+    return cartItems
+      .filter(item => item.selectedForCheckout)
+      .reduce((total, item) => total + item.quantity, 0);
   };
 
   return (
@@ -132,6 +162,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         clearCart,
         getTotalPrice,
         getTotalItems,
+        toggleItemSelection,
+        removePurchasedItems,
+        selectAllItems,
       }}
     >
       {children}

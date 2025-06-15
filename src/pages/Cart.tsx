@@ -8,16 +8,30 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useWallet } from '@/contexts/WalletContext';
 import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { cartItems, removeFromCart, updateQuantity, clearCart, getTotalPrice, getTotalItems } = useCart();
+  const { 
+    cartItems, 
+    removeFromCart, 
+    updateQuantity, 
+    clearCart, 
+    getTotalPrice, 
+    getTotalItems, 
+    toggleItemSelection, 
+    removePurchasedItems,
+    selectAllItems
+  } = useCart();
   const { balance, deductMoney } = useWallet();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const totalPrice = getTotalPrice();
-  const totalItems = getTotalItems();
+  const totalItems = getTotalItems(); // Selected items count
+  const totalCartItemsCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const allItemsSelected = cartItems.length > 0 && cartItems.every(item => item.selectedForCheckout);
+  
   const deliveryFee = totalPrice > 500 ? 0 : 50;
   const finalTotal = totalPrice + deliveryFee;
 
@@ -34,10 +48,11 @@ const Cart = () => {
   };
 
   const handleWalletCheckout = async () => {
-    if (cartItems.length === 0) {
+    const selectedItems = cartItems.filter(item => item.selectedForCheckout);
+    if (selectedItems.length === 0) {
       toast({
-        title: "कार्ट खाली है",
-        description: "कृपया पहले कुछ उत्पाद जोड़ें",
+        title: "कोई आइटम नहीं चुना गया",
+        description: "चेकआउट करने के लिए कृपया आइटम चुनें।",
         variant: "destructive",
       });
       return;
@@ -62,7 +77,7 @@ const Cart = () => {
           title: "ऑर्डर सफल!",
           description: `₹${finalTotal} का भुगतान पूरा हो गया। ${totalItems} उत्पाद ऑर्डर किए गए`,
         });
-        clearCart();
+        removePurchasedItems();
         navigate('/purchase-history');
       }
       setIsProcessing(false);
@@ -70,10 +85,11 @@ const Cart = () => {
   };
 
   const handlePaymentGateway = () => {
-    if (cartItems.length === 0) {
+    const selectedItems = cartItems.filter(item => item.selectedForCheckout);
+    if (selectedItems.length === 0) {
       toast({
-        title: "कार्ट खाली है",
-        description: "कृपया पहले कुछ उत्पाद जोड़ें",
+        title: "कोई आइटम नहीं चुना गया",
+        description: "चेकआउट करने के लिए कृपया आइटम चुनें।",
         variant: "destructive",
       });
       return;
@@ -82,7 +98,7 @@ const Cart = () => {
     navigate('/payment', { 
       state: { 
         amount: finalTotal, 
-        items: cartItems,
+        items: selectedItems,
         type: 'cart_checkout'
       } 
     });
@@ -108,7 +124,7 @@ const Cart = () => {
                 आपका कार्ट
               </h1>
               <p className="text-gray-600 mt-1">
-                {totalItems > 0 ? `${totalItems} उत्पाद • कुल ₹${totalPrice.toLocaleString()}` : 'कार्ट खाली है'}
+                {totalItems > 0 ? `${totalItems} उत्पाद चुने गए • कुल ₹${totalPrice.toLocaleString()}` : 'कार्ट खाली है'}
               </p>
             </div>
           </div>
@@ -136,24 +152,45 @@ const Cart = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2">
+              <p className="text-gray-600 mb-4 text-center md:text-left">“Select the items you want to order now”</p>
               <Card className="shadow-xl border-0">
                 <CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white rounded-t-lg">
-                  <CardTitle className="flex items-center justify-between">
-                    <span>कार्ट आइटम ({totalItems})</span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-white hover:bg-green-600"
-                      onClick={clearCart}
-                    >
-                      सभी हटाएं
-                    </Button>
+                  <CardTitle className="flex items-center justify-between flex-wrap gap-2">
+                    <span>कार्ट आइटम ({totalItems} / {totalCartItemsCount} चुने गए)</span>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2 text-sm font-normal">
+                        <Checkbox
+                          id="select-all"
+                          checked={allItemsSelected}
+                          onCheckedChange={(checked) => selectAllItems(Boolean(checked))}
+                          className="border-white data-[state=checked]:bg-white data-[state=checked]:text-green-700 h-5 w-5"
+                        />
+                        <label htmlFor="select-all" className="cursor-pointer">सभी चुनें</label>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-white hover:bg-green-600"
+                        onClick={clearCart}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        सभी हटाएं
+                      </Button>
+                    </div>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-6">
+                <CardContent className="p-0 sm:p-6">
+                  <div className="space-y-0 sm:space-y-6">
                     {cartItems.map((item) => (
-                      <div key={item.id} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl">
+                      <div key={item.id} className={`flex items-start space-x-4 p-4 transition-all duration-300 ${item.selectedForCheckout ? 'bg-green-50' : 'bg-gray-50 opacity-60'} border-b sm:rounded-xl sm:border-0`}>
+                        <div className="flex items-center h-full pt-8 sm:pt-1">
+                           <Checkbox
+                            id={`select-${item.id}`}
+                            checked={item.selectedForCheckout}
+                            onCheckedChange={() => toggleItemSelection(item.id)}
+                            className="h-6 w-6"
+                          />
+                        </div>
                         <div 
                           className="cursor-pointer hover:opacity-80 transition-opacity"
                           onClick={() => handleViewProduct(item.id)}
@@ -240,7 +277,7 @@ const Cart = () => {
             <div className="lg:col-span-1">
               <Card className="shadow-xl border-0 sticky top-8">
                 <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
-                  <CardTitle>ऑर्डर सारांश</CardTitle>
+                  <CardTitle>ऑर्डर सारांश (चुने हुए आइटम)</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="space-y-4">
