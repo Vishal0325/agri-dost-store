@@ -7,12 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useCart } from '@/contexts/CartContext';
+import { allBrands } from '@/lib/brands';
 
 const BrandDetailPage = () => {
   const navigate = useNavigate();
-  const { brandName } = useParams();
+  const { brandSlug } = useParams();
   const { toast } = useToast();
   const { addToCart } = useCart();
+
+  // Find brand by slug
+  const brand = allBrands.find(b => b.slug === brandSlug);
 
   const handleBack = () => {
     navigate(-1);
@@ -24,16 +28,35 @@ const BrandDetailPage = () => {
       name: product.name,
       price: product.price,
       image: product.image,
-      company: brandName || 'Unknown Brand',
+      company: brand?.name || 'Unknown Brand',
       badge: product.inStock ? 'In Stock' : 'Out of Stock'
     };
     addToCart(cartProduct);
+    
+    toast({
+      title: "Added to Cart!",
+      description: `${product.name} has been added to your cart`,
+    });
   };
 
-  // Brand information
+  // If brand not found, show error
+  if (!brand) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Brand Not Found</h1>
+          <p className="text-gray-600 mb-6">The brand you're looking for doesn't exist.</p>
+          <Button onClick={() => navigate('/')}>Go to Homepage</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Brand information - enhanced with real brand data
   const brandInfo = {
-    name: brandName || 'Brand Name',
-    description: "Leading agricultural solutions provider committed to empowering farmers with innovative products and sustainable farming practices.",
+    name: brand.name,
+    description: brand.description,
+    tagline: brand.tagline,
     history: "With over 25 years of experience in the agricultural sector, we have been at the forefront of agricultural innovation.",
     commitment: "Our commitment to quality ensures that every product meets the highest standards for agricultural excellence.",
     stats: {
@@ -118,9 +141,16 @@ const BrandDetailPage = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{brandName || 'Brand Name'}</h1>
-                <p className="text-gray-600">{brandProducts.length} products available</p>
+              <div className="flex items-center space-x-3">
+                <img 
+                  src={brand.logo} 
+                  alt={brand.name}
+                  className="w-12 h-12 object-cover rounded-lg"
+                />
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">{brand.name}</h1>
+                  <p className="text-gray-600">{brandProducts.length} products available</p>
+                </div>
               </div>
             </div>
           </div>
@@ -132,9 +162,14 @@ const BrandDetailPage = () => {
         <Card className="mb-8 bg-gradient-to-r from-green-50 to-blue-50 border-0 shadow-lg">
           <CardHeader>
             <CardTitle className="text-3xl font-bold text-gray-900 flex items-center">
-              <Leaf className="h-8 w-8 mr-3 text-green-600" />
+              <img 
+                src={brand.logo} 
+                alt={brand.name}
+                className="w-12 h-12 object-cover rounded-lg mr-4"
+              />
               {brandInfo.name}
             </CardTitle>
+            <p className="text-lg text-green-600 font-medium">{brandInfo.tagline}</p>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-2 gap-8">
@@ -174,7 +209,6 @@ const BrandDetailPage = () => {
           {brandProducts.map((product) => (
             <div key={product.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
               <div className="flex items-center p-4 space-x-4">
-                {/* Product Image */}
                 <div className="flex-shrink-0">
                   <img 
                     src={product.image}
@@ -183,7 +217,6 @@ const BrandDetailPage = () => {
                   />
                 </div>
 
-                {/* Product Details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -191,7 +224,6 @@ const BrandDetailPage = () => {
                         {product.name}
                       </h3>
                       
-                      {/* Rating */}
                       <div className="flex items-center mb-2">
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
@@ -206,12 +238,10 @@ const BrandDetailPage = () => {
                         <span className="text-sm text-gray-600 ml-1">({product.rating})</span>
                       </div>
 
-                      {/* Size */}
                       <p className="text-sm text-gray-600 mb-2">
                         Size: <span className="font-medium">{product.size}</span>
                       </p>
 
-                      {/* Stock Status */}
                       <div className="flex items-center space-x-2">
                         <Badge variant={product.inStock ? "default" : "secondary"}>
                           {product.inStock ? 'In Stock' : 'Out of Stock'}
@@ -219,7 +249,6 @@ const BrandDetailPage = () => {
                       </div>
                     </div>
 
-                    {/* Price and Actions */}
                     <div className="text-right">
                       <div className="mb-3">
                         <div className="flex items-center space-x-2">
