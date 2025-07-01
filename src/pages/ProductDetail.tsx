@@ -20,7 +20,7 @@ const ProductDetailPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState('500ml');
+  const [selectedSize, setSelectedSize] = useState('');
   const [activeTab, setActiveTab] = useState('description');
   
   const { id } = useParams<{ id: string }>();
@@ -50,7 +50,10 @@ const ProductDetailPage = () => {
         setError(null);
         const productData = await getProductById(id);
         setProduct(productData);
-        setSelectedSize(productData.sizeOptions[3]?.size || productData.sizeOptions[0]?.size || '500ml');
+        // Set default size to middle option or first if available
+        const defaultSizeIndex = Math.floor(productData.sizeOptions.length / 2);
+        const defaultSize = productData.sizeOptions[defaultSizeIndex] || productData.sizeOptions[0];
+        setSelectedSize(`${defaultSize.size}${defaultSize.unit}`);
       } catch (err) {
         console.error('Failed to load product:', err);
         if (err instanceof Error && err.message === 'Product not found') {
@@ -68,14 +71,19 @@ const ProductDetailPage = () => {
 
   const getCurrentPrice = () => {
     if (!product) return 0;
-    const currentOption = product.sizeOptions.find(option => option.size === selectedSize);
+    const currentOption = product.sizeOptions.find(option => `${option.size}${option.unit}` === selectedSize);
     return currentOption ? currentOption.price : product.sellingPrice;
   };
 
   const getCurrentMRP = () => {
     if (!product) return 0;
-    const currentOption = product.sizeOptions.find(option => option.size === selectedSize);
+    const currentOption = product.sizeOptions.find(option => `${option.size}${option.unit}` === selectedSize);
     return currentOption ? currentOption.mrp : product.mrp;
+  };
+
+  const getCurrentSizeOption = () => {
+    if (!product) return null;
+    return product.sizeOptions.find(option => `${option.size}${option.unit}` === selectedSize);
   };
 
   const handleBack = () => {
@@ -94,22 +102,25 @@ const ProductDetailPage = () => {
     if (!product) return;
     
     const currentPrice = getCurrentPrice();
+    const currentSizeOption = getCurrentSizeOption();
     const cartItem = {
       id: product.id,
-      name: product.name,
+      name: `${product.name} (${selectedSize})`,
       price: currentPrice,
       originalPrice: getCurrentMRP(),
       image: product.images[0],
       company: product.brand,
       badge: product.badge,
-      quantity: quantity
+      quantity: quantity,
+      size: selectedSize,
+      sizeDetails: currentSizeOption ? `${currentSizeOption.size} ${currentSizeOption.unit}` : selectedSize
     };
     
     addToCart(cartItem);
     console.log('Adding to cart:', product.name, 'Size:', selectedSize, 'Quantity:', quantity, 'Price:', currentPrice);
     toast({
-      title: "कार्ट में जोड़ा गया!",
-      description: `${quantity} ${product.name} (${selectedSize}) आपके कार्ट में जोड़ दिया गया है`,
+      title: "Added to Cart!",
+      description: `${quantity} ${product.name} (${selectedSize}) has been added to your cart`,
     });
   };
 
@@ -377,17 +388,40 @@ const ProductDetailPage = () => {
 
             {/* Size Options */}
             <div className="mb-6">
-              <h3 className="font-semibold mb-3">Size Options</h3>
+              <h3 className="font-semibold mb-3">
+                {product.measurementType === 'weight' ? 'Weight Options' : 'Volume Options'}
+              </h3>
+              <p className="text-sm text-gray-600 mb-3">
+                {product.measurementType === 'weight' 
+                  ? 'Select quantity by weight (grams/kilograms)'
+                  : 'Select quantity by volume (milliliters/liters)'
+                }
+              </p>
               <Select value={selectedSize} onValueChange={setSelectedSize}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select size" />
                 </SelectTrigger>
                 <SelectContent>
-                  {product.sizeOptions.map((option) => (
-                    <SelectItem key={option.size} value={option.size}>
-                      {option.size} - ₹{option.price} (MRP: ₹{option.mrp})
-                    </SelectItem>
-                  ))}
+                  {product.sizeOptions.map((option) => {
+                    const sizeKey = `${option.size}${option.unit}`;
+                    const discount = Math.round(((option.mrp - option.price) / option.mrp) * 100);
+                    return (
+                      <SelectItem key={sizeKey} value={sizeKey}>
+                        <div className="flex items-center justify-between w-full">
+                          <span className="font-medium">{option.size} {option.unit}</span>
+                          <div className="ml-4 text-right">
+                            <span className="text-green-600 font-semibold">₹{option.price}</span>
+                            <span className="text-gray-400 line-through ml-2 text-sm">₹{option.mrp}</span>
+                            {discount > 0 && (
+                              <span className="bg-red-100 text-red-600 text-xs px-1 py-0.5 rounded ml-2">
+                                {discount}% OFF
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -426,7 +460,9 @@ const ProductDetailPage = () => {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
-                <span className="text-gray-600">packets</span>
+                 <span className="text-gray-600">
+                   {product.measurementType === 'weight' ? 'packets' : 'bottles'}
+                 </span>
               </div>
             </div>
 
