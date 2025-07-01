@@ -1,26 +1,46 @@
 
 import React from 'react';
-import { ArrowLeft, Star, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, Star, ShoppingCart, Award, Users, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/contexts/CartContext';
 
 const BrandDetailPage = () => {
   const navigate = useNavigate();
   const { brandName } = useParams();
   const { toast } = useToast();
+  const { addToCart } = useCart();
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  const handleAddToCart = (productName: string, price: number) => {
-    console.log('Adding to cart:', productName);
-    toast({
-      title: "कार्ट में जोड़ा गया!",
-      description: `${productName} आपके कार्ट में जोड़ दिया गया है`,
-    });
+  const handleAddToCart = (product: any) => {
+    const cartProduct = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      company: brandName || 'Unknown Brand',
+      badge: product.inStock ? 'In Stock' : 'Out of Stock'
+    };
+    addToCart(cartProduct);
+  };
+
+  // Brand information
+  const brandInfo = {
+    name: brandName || 'Brand Name',
+    description: "Leading agricultural solutions provider committed to empowering farmers with innovative products and sustainable farming practices.",
+    history: "With over 25 years of experience in the agricultural sector, we have been at the forefront of agricultural innovation.",
+    commitment: "Our commitment to quality ensures that every product meets the highest standards for agricultural excellence.",
+    stats: {
+      experience: "25+ Years",
+      farmers: "10,000+ Farmers",
+      products: "50+ Products"
+    }
   };
 
   // Mock brand products data - in real app this would come from API
@@ -107,8 +127,49 @@ const BrandDetailPage = () => {
         </div>
       </div>
 
-      {/* Products List */}
       <div className="container mx-auto px-4 py-6">
+        {/* Brand Introduction Section */}
+        <Card className="mb-8 bg-gradient-to-r from-green-50 to-blue-50 border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-3xl font-bold text-gray-900 flex items-center">
+              <Leaf className="h-8 w-8 mr-3 text-green-600" />
+              {brandInfo.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <p className="text-lg text-gray-700 mb-4">{brandInfo.description}</p>
+                <p className="text-gray-600 mb-4">{brandInfo.history}</p>
+                <p className="text-gray-600">{brandInfo.commitment}</p>
+              </div>
+              <div className="space-y-4">
+                <h4 className="text-xl font-semibold text-gray-900 mb-4">Our Legacy</h4>
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm">
+                    <Award className="h-6 w-6 text-green-600" />
+                    <span className="font-medium">{brandInfo.stats.experience} Experience</span>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm">
+                    <Users className="h-6 w-6 text-blue-600" />
+                    <span className="font-medium">{brandInfo.stats.farmers} Served</span>
+                  </div>
+                  <div className="flex items-center space-x-3 p-3 bg-white rounded-lg shadow-sm">
+                    <ShoppingCart className="h-6 w-6 text-purple-600" />
+                    <span className="font-medium">{brandInfo.stats.products} Available</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Product Catalog Section */}
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Catalog</h2>
+          <p className="text-gray-600">Discover our range of high-quality agricultural products</p>
+        </div>
+        
         <div className="space-y-4">
           {brandProducts.map((product) => (
             <div key={product.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
@@ -172,7 +233,7 @@ const BrandDetailPage = () => {
 
                       <Button 
                         className="bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => handleAddToCart(product.name, product.price)}
+                        onClick={() => handleAddToCart(product)}
                         disabled={!product.inStock}
                       >
                         <ShoppingCart className="h-4 w-4 mr-2" />
