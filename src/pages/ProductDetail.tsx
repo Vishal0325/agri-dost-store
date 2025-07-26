@@ -94,6 +94,12 @@ const ProductDetailPage = () => {
     navigate('/products');
   };
 
+  const handleBackToCategory = () => {
+    if (product) {
+      navigate(`/products?category=${product.category}`);
+    }
+  };
+
   const handleBackToCart = () => {
     navigate('/cart');
   };
@@ -308,15 +314,34 @@ const ProductDetailPage = () => {
       {/* Breadcrumb */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center space-x-2 text-sm">
-            <Button variant="ghost" size="sm" className="p-0" onClick={handleBack}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 text-sm">
+              <Button variant="ghost" size="sm" className="p-0" onClick={handleBack}>
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Back
+              </Button>
+              <span className="text-gray-400">/</span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-0 text-green-600 hover:text-green-700" 
+                onClick={handleBackToCategory}
+              >
+                {product.category}
+              </Button>
+              <span className="text-gray-400">/</span>
+              <span className="text-gray-900">{product.name}</span>
+            </div>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleBackToCategory}
+              className="border-green-600 text-green-600 hover:bg-green-50"
+            >
               <ArrowLeft className="h-4 w-4 mr-1" />
-              Back
+              Back to {product.category}
             </Button>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-600">{product.category}</span>
-            <span className="text-gray-400">/</span>
-            <span className="text-gray-900">{product.name}</span>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, Grid, List, Star, ShoppingCart, Wallet } from 'lucide-react';
+import { Search, Filter, Grid, List, Star, ShoppingCart, Wallet, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { useWallet } from '@/contexts/WalletContext';
 import { useCart } from '@/contexts/CartContext';
+import { useNavigate } from 'react-router-dom';
 
 const ProductsPage = () => {
   const [viewMode, setViewMode] = useState('grid');
@@ -18,6 +19,7 @@ const ProductsPage = () => {
 
   const { balance } = useWallet();
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   // Expanded product catalog with 32 products
   const products = [
@@ -478,6 +480,10 @@ const ProductsPage = () => {
     addToCart({ ...product, company: product.brand });
   };
 
+  const handleViewProduct = (productId: number) => {
+    navigate(`/product/${productId}`);
+  };
+
   // Pagination logic
   const totalPages = Math.ceil(products.length / productsPerPage);
   const startIndex = (currentPage - 1) * productsPerPage;
@@ -681,44 +687,64 @@ const ProductsPage = () => {
                     )}
                   </div>
                   
-                  <CardContent className={`${viewMode === 'list' ? 'flex-1 flex flex-col justify-between' : ''} p-6`}>
-                    <div>
-                      <p className="text-sm text-green-600 font-medium mb-1">{product.brand}</p>
-                      <h3 className="font-bold text-lg mb-3 group-hover:text-green-600 transition-colors line-clamp-2">
-                        {product.name}
-                      </h3>
-                      
-                      <div className="flex items-center mb-3">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`h-4 w-4 ${
-                                i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                              }`} 
-                            />
-                          ))}
-                        </div>
-                        <span className="text-sm text-gray-600 ml-2">({product.reviews})</span>
-                      </div>
-                      
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <span className="text-2xl font-bold text-green-600">₹{product.price.toLocaleString()}</span>
-                          <span className="text-lg text-gray-500 line-through ml-2">₹{product.originalPrice.toLocaleString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <Button 
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2 rounded-full transform hover:scale-105 transition-all duration-200"
-                      disabled={!product.inStock}
-                      onClick={() => handleAddToCart(product)}
-                    >
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      कार्ट में जोड़ें
-                    </Button>
-                  </CardContent>
+                   <CardContent className={`${viewMode === 'list' ? 'flex-1 flex flex-col justify-between' : ''} p-6`}>
+                     <div 
+                       className="cursor-pointer"
+                       onClick={() => handleViewProduct(product.id)}
+                     >
+                       <p className="text-sm text-green-600 font-medium mb-1">{product.brand}</p>
+                       <h3 className="font-bold text-lg mb-3 group-hover:text-green-600 transition-colors line-clamp-2">
+                         {product.name}
+                       </h3>
+                       
+                       <div className="flex items-center mb-3">
+                         <div className="flex items-center">
+                           {[...Array(5)].map((_, i) => (
+                             <Star 
+                               key={i} 
+                               className={`h-4 w-4 ${
+                                 i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                               }`} 
+                             />
+                           ))}
+                         </div>
+                         <span className="text-sm text-gray-600 ml-2">({product.reviews})</span>
+                       </div>
+                       
+                       <div className="flex items-center justify-between mb-4">
+                         <div>
+                           <span className="text-2xl font-bold text-green-600">₹{product.price.toLocaleString()}</span>
+                           <span className="text-lg text-gray-500 line-through ml-2">₹{product.originalPrice.toLocaleString()}</span>
+                         </div>
+                       </div>
+                     </div>
+                     
+                     <div className="space-y-2">
+                       <Button 
+                         variant="outline"
+                         className="w-full border-green-600 text-green-600 hover:bg-green-50 font-medium py-2 rounded-full"
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           handleViewProduct(product.id);
+                         }}
+                       >
+                         <Eye className="h-4 w-4 mr-2" />
+                         उत्पाद देखें
+                       </Button>
+                       
+                       <Button 
+                         className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2 rounded-full transform hover:scale-105 transition-all duration-200"
+                         disabled={!product.inStock}
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           handleAddToCart(product);
+                         }}
+                       >
+                         <ShoppingCart className="h-4 w-4 mr-2" />
+                         कार्ट में जोड़ें
+                       </Button>
+                     </div>
+                   </CardContent>
                 </Card>
               ))}
             </div>
