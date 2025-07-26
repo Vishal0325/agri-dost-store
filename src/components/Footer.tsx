@@ -35,10 +35,10 @@ const Footer = () => {
                     <div>
                         <h5 className="font-semibold mb-4">{t('footer.quickLinks')}</h5>
                         <ul className="space-y-2 text-green-200">
-                            <li><a href="#" className="hover:text-white transition-colors">{t('footer.aboutUs')}</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">{t('footer.contact')}</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">{t('footer.support')}</a></li>
-                            <li><a href="#" className="hover:text-white transition-colors">{t('footer.terms')}</a></li>
+                            <li><a href="/about" className="hover:text-white transition-colors">About Us</a></li>
+                            <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
+                            <li><a href="/support" className="hover:text-white transition-colors">Support</a></li>
+                            <li><a href="/terms" className="hover:text-white transition-colors">Terms</a></li>
                         </ul>
                     </div>
                     <div>
@@ -60,13 +60,20 @@ const Footer = () => {
                     </div>
                     <div>
                         <h5 className="font-semibold mb-4">{t('footer.contactInfo')}</h5>
-                        <div className="space-y-2 text-green-200">
+                        <div className="space-y-3 text-green-200">
                             <p className="flex items-center">
                                 <Phone className="h-4 w-4 mr-2" />
-                                {t('header.phone')}
+                                +91 98765 43210
                             </p>
                             <p>📧 info@krishimart.com</p>
-                            <p>📍 New Delhi, India</p>
+                            <p>📍 Agricultural Hub, New Delhi, India</p>
+                            <div className="mt-4">
+                                <h6 className="font-semibold text-white mb-2">About KrishiMart</h6>
+                                <p className="text-sm text-green-200">
+                                    We are dedicated to providing farmers with high-quality agricultural products at competitive prices. 
+                                    With over 1000+ satisfied farmers, we ensure original products and fast delivery across India.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

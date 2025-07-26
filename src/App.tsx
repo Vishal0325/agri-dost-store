@@ -28,6 +28,10 @@ import CategoriesPage from '@/pages/admin/CategoriesPage';
 import DataPage from '@/pages/admin/DataPage';
 import PagesPage from '@/pages/admin/PagesPage';
 import SectionsPage from '@/pages/admin/SectionsPage';
+import About from '@/pages/About';
+import Contact from '@/pages/Contact';
+import Support from '@/pages/Support';
+import Terms from '@/pages/Terms';
 import Chatbot from '@/components/Chatbot';
 import './App.css';
 
@@ -64,6 +68,10 @@ function App() {
                       <Route path="/admin/data" element={<DataPage />} />
                       <Route path="/admin/pages" element={<PagesPage />} />
                       <Route path="/admin/sections" element={<SectionsPage />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/contact" element={<Contact />} />
+                      <Route path="/support" element={<Support />} />
+                      <Route path="/terms" element={<Terms />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
                   </main>

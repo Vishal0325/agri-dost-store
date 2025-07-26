@@ -19,7 +19,7 @@ const HeroSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
             <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 text-base font-semibold rounded-full shadow-lg">
-              🎉 {t('nav.offers')} - Limited Time Offers!
+              🌾 Original Agri Products | Fast Delivery | Trusted by 1000+ Farmers
             </Badge>
             
             <div className="space-y-4">
